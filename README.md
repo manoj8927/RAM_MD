@@ -359,7 +359,7 @@ No extra API key or npm dependency is required.
 .ffinfo 123456789
 ```
 
-Looks up a **public Free Fire player profile** by its 5–15 digit UID. Displays player nickname, UID, region, level, likes, BR/CS rank codes and points, badges, account dates, guild information, signature and credit score **when returned by the API**. Missing fields show `Not available`. Rank codes are raw API values, not translated into named tiers.
+Looks up a **public Free Fire player profile** by its 5–15 digit UID. Displays player nickname, UID, region, level, likes, BR/CS rank codes and points, badges, account dates, EXP, banner/avatar/profile IDs, pet details, guild name/ID/level/EXP/member counts, guild leader UID/name/level/likes/ranks/banner ID, signature and credit score **when returned by the API**. Banner/avatar IDs are metadata, not rendered images. Missing fields show `Not available`. Rank codes are raw API values, not translated into named tiers.
 
 The plugin uses the third-party, no-key community endpoint `https://api2.nftoken.info/player-info?uid=...`. It is **not affiliated with Garena** and may be slow, inaccurate, offline, rate-limited or changed without notice. No password, login or account access is requested. Use only public player IDs; do not rely on this for security, ownership or ban-status decisions.
 
