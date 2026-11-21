@@ -31,41 +31,50 @@ function buildMenu(plugins, config) {
 
   const bot = config.botName || 'RAM-MD';
   const clean = (value) => String(value ?? '').replace(/[\r\n*]/g, ' ').trim();
-  const div = '━━━━━━━━━━━━━━━━━━━━';
-  const labels = {
-    Download: '📥 DOWNLOAD CENTER',
-    Games: '🎮 GAME ZONE',
-    Tools: '🛠️ SMART TOOLS',
-    Media: '🎬 MEDIA STUDIO',
-    Group: '👥 GROUP MANAGER',
-    Profile: '👤 PROFILE',
-    Settings: '⚙️ SETTINGS',
-    General: '✨ GENERAL',
+  const prefix = clean(p || '.');
+  const categories = {
+    Download: ['📥', 'DOWNLOAD HUB'],
+    Games: ['🎮', 'GAME ZONE'],
+    Tools: ['🛠️', 'UTILITY TOOLS'],
+    Media: ['🎬', 'MEDIA STUDIO'],
+    Group: ['👥', 'GROUP CONTROL'],
+    Profile: ['👤', 'PROFILE CENTER'],
+    Settings: ['⚙️', 'BOT SETTINGS'],
+    General: ['✨', 'GENERAL COMMANDS'],
   };
-  let out =
-    `╭───〔 ⚡ *${clean(bot)}* 〕───╮\n` +
-    `│  ✧ *PREMIUM BOT DASHBOARD*\n` +
-    `╰${div}╯\n\n` +
-    `╭─❖ *BOT INFORMATION*\n` +
-    `│ 👑 *Owner*   : ${clean(config.ownerName || 'Owner')}\n` +
-    `│ 📦 *Commands* : ${total}\n` +
-    `│ ⏳ *Uptime*   : ${runtime(process.uptime())}\n` +
-    `│ 🔑 *Prefix*   : ${clean(p)}\n` +
-    `│ 🌐 *Mode*     : Public\n` +
-    `│ 🚀 *Version*  : ${clean(config.version || pkg.version || '1.0.0')}\n` +
-    `╰${div}╯\n`;
+  const uniqueTotal = cats.reduce((n, cat) => n + new Set(groups[cat]).size, 0);
+  const line = '━━━━━━━━━━━━━━━━━━';
+  let out = [
+    '╭' + line + '╮',
+    '      ⚡ *『 ' + clean(bot) + ' 』* ⚡',
+    '        ᴘʀᴇᴍɪᴜᴍ ᴇᴅɪᴛɪᴏɴ',
+    '╰' + line + '╯',
+    '',
+    '╭─「 *SYSTEM OVERVIEW* 」',
+    '│ 👑  *Owner*     : ' + clean(config.ownerName || 'Owner'),
+    '│ 🧩  *Commands* : ' + uniqueTotal,
+    '│ ⏱️  *Uptime*    : ' + (runtime(process.uptime()) || '0s'),
+    '│ ⌨️  *Prefix*     : ' + prefix,
+    '│ 🌐  *Mode*      : Public',
+    '│ 🏷️  *Version*   : ' + clean(config.version || pkg.version || '1.0.0'),
+    '╰' + line,
+  ].join('\n');
 
-  for (const c of cats) {
-    const commands = [...new Set(groups[c])];
-    out += `\n╭─❖ *${labels[c] || '📂 ' + clean(c).toUpperCase()}*\n`;
-    for (const cmd of commands) {
-      out += `│  ◈ ${p}*${clean(cmd).toLowerCase()}*\n`;
-    }
-    out += `╰${div}╯\n`;
+  for (const cat of cats) {
+    const [emoji, title] = categories[cat] || ['📁', clean(cat).toUpperCase()];
+    const commands = [...new Set(groups[cat])].filter(Boolean);
+    if (!commands.length) continue;
+    out += '\n\n' + '╭─「 ' + emoji + ' *' + title + '* 」\n';
+    out += '│  ' + commands.map(cmd => '◈ ' + prefix + clean(cmd).toLowerCase()).join('\n│  ') + '\n';
+    out += '╰' + line;
   }
-  out += `\n✦ *Powered by ${clean(bot)}*\n` +
-    `♡ *Made with love by SANJOY X TECH*\n` +
-    `⚡ _Fast • Smart • Reliable_`;
+
+  out += '\n\n' +
+    '✧ _Choose a command from the menu_\n' +
+    '✧ _Example: ' + prefix + 'ping_\n\n' +
+    '『 ⚡ *' + clean(bot) + '* ⚡ 』\n' +
+    '♡ *SANJOY X TECH*\n' +
+    '_Fast • Smart • Reliable_';
   return out.trim();
 }
 
