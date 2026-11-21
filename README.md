@@ -26,6 +26,7 @@ A Node.js WhatsApp bot powered by Baileys, with owner controls, AI fallback, sta
 - [📱 WhatsApp pairing](#-whatsapp-pairing)
 - [📚 Commands](#-commands)
 - [🧩 New plugin packs](#-new-plugin-packs)
+- [🆕 Additional command packs](#-additional-command-packs--31-commands)
 - [📁 Project structure](#-project-structure)
 - [🛠️ Troubleshooting](#️-troubleshooting)
 - [🔒 Security](#-security)
@@ -35,12 +36,12 @@ A Node.js WhatsApp bot powered by Baileys, with owner controls, AI fallback, sta
 
 | Category | Included functionality |
 | --- | --- |
-| 🤖 AI | AI chat, automatic replies, provider fallback, `.aitest`, translation (`.trt`), summaries, captions, grammar and quizzes |
+| 🤖 AI | AI chat, automatic replies, provider fallback, `.aitest`, translation (`.trt`), summaries, captions, grammar, quizzes, stories, scripts and debates |
 | 💬 WhatsApp | Pairing-code login, reconnect handling, owner commands |
 | ❤️ Status | Automatic status view and reactions |
 | 🎬 Media | YouTube, Instagram, Facebook and TikTok tools; movie details via TMDB; audio/video handling and stickers |
-| 👥 Groups | Group information, tagging and moderation commands |
-| 🎮 Games | RPS, dice, tic-tac-toe, car, snake, trivia, riddles, word scramble, math challenges and safe prank simulations |
+| 👥 Groups | Group information, tagging, welcome/goodbye, anti-link, warnings and polls |
+| 🎮 Games | RPS, dice, tic-tac-toe, car, snake, trivia, riddles, word scramble, math challenges, challenge leaderboard and safe prank simulations |
 | 🛠️ Utilities | Runtime, settings, font converter, calculator, passwords, UUID, text stats, Base64, URL encoding, SHA-256 and JSON formatting |
 | 🧩 Plugins | Local plugin-based command system |
 
@@ -408,6 +409,92 @@ npm start
 
 For an already-running process, restart or redeploy it through your hosting panel instead of starting a second bot instance. The plugins were committed to GitHub, but successful live execution depends on your deployment and has not been verified here.
 
+## 🆕 Additional command packs — 31 commands
+
+These plugins are included in `plugins/` and load when the bot starts. The default prefix is `.`.
+
+### 🤖 AI creative — [ai-creative-pack.js](plugins/ai-creative-pack.js)
+
+| Command | Example |
+| --- | --- |
+| `.aiscript` | `.aiscript Short video about anime` — video script |
+| `.aidebate` | `.aidebate Online learning vs classroom` — balanced arguments |
+| `.aistory` | `.aistory A mysterious robot` — original story |
+| `.aiprompt` | `.aiprompt Gaming logo` — structured prompt |
+| `.aivoice` | `.aivoice Movie review intro` — **voiceover script text**, not generated audio |
+
+These commands reuse the existing AI provider setup and need an active AI key. Provider quotas apply.
+
+### 🛠️ More utilities — [more-utilities.js](plugins/more-utilities.js)
+
+| Command | Example / requirement |
+| --- | --- |
+| `.qr` | `.qr https://example.com` — QR image via QRServer; sends content to external QR service |
+| `.github` | `.github manoj8927/RAM_MD` — public GitHub repository details |
+| `.ocr` | Reply to an image with `.ocr`; requires `OCR_SPACE_API_KEY` and sends image to OCR.space |
+| `.remind` | `.remind 10m Drink water` — reminder in current chat (1 minute–24 hours) |
+| `.binary` | `.binary Hello` — UTF-8 binary bytes |
+| `.weather` | `.weather Kolkata` — current Open-Meteo weather |
+| `.shorturl` | `.shorturl https://example.com` — TinyURL short link |
+
+`.remind` stores one active reminder per user/chat **in memory**: reminders are lost on restart/redeploy, and only work while the bot stays online. `.ocr` currently supports English recognition and images up to 3 MB. External API availability and limits may change. Do not submit private images or secrets to external services.
+
+### 👥 Group management — [group-extras.js](plugins/group-extras.js)
+
+| Command | Example / purpose |
+| --- | --- |
+| `.welcome` | `.welcome on` / `.welcome off` — greet new members |
+| `.goodbye` | `.goodbye on` / `.goodbye off` — goodbye messages |
+| `.antilink` | `.antilink on` / `.antilink off` — detect links in ordinary group messages |
+| `.warn` | Reply to a member or mention them with `.warn` |
+| `.warnings` | View saved warning counts; reply/mention for one member |
+| `.poll` | `.poll Best anime? | Naruto | One Piece` — native WhatsApp poll |
+
+Changes to group settings and warning counts are saved in `data/group-extras.json`. Only group admins or the configured bot owner can modify settings, issue warnings or create polls. Warning counts do **not** automatically remove members. For anti-link message deletion the bot must be a group admin; if deletion is unavailable it may still send a warning. Welcome/goodbye depend on WhatsApp group participant events. Keep `data/` persistent.
+
+### 🎮 Challenge games — [challenge-games.js](plugins/challenge-games.js)
+
+| Command | Example |
+| --- | --- |
+| `.emojiquiz` | Start emoji category quiz; answer `.emojiquiz fruits` |
+| `.fasttype` | Start exact-text typing challenge; answer with `.fasttype <phrase>` |
+| `.numberbattle` | Guess 1–20; answer `.numberbattle 10` |
+| `.quizbattle` | Multiple-choice trivia; answer `.quizbattle 2` |
+| `.leaderboard` | Show in-memory session scores |
+
+Challenges allow three attempts and expire after 10 minutes. Leaderboard points reset when the bot restarts and are not separated by group. `.fasttype` checks exact text; it does **not** measure typing speed.
+
+### 😂 Fun commands — [fun-extra.js](plugins/fun-extra.js)
+
+| Command | Purpose |
+| --- | --- |
+| `.meme` | Random text meme |
+| `.joke` | Random joke |
+| `.ship Alice, Bob` | Random fictional match percentage |
+| `.fact` | Random general-knowledge fact |
+| `.quote` | Motivational quote |
+| `.roast` | Lighthearted, non-targeted roast |
+
+### 🔐 Optional OCR key
+
+Get an OCR.space API key from [OCR.space](https://ocr.space/ocrapi) and configure the hosting environment:
+
+```dotenv
+OCR_SPACE_API_KEY=YOUR_PRIVATE_OCR_KEY
+```
+
+Do not commit keys or private images. Restart the bot after adding the key.
+
+### 🚀 Deploy new commands
+
+```bash
+git pull origin main
+npm install --omit=dev
+npm start
+```
+
+If the bot is already running, restart it from your hosting panel or PM2 instead of starting a duplicate process. Test `.menu`, `.github manoj8927/RAM_MD`, `.weather Kolkata`, `.quizbattle`, and `.poll Test | Yes | No` in a test group. These plugins have been committed but have **not been live-tested on a connected WhatsApp session**.
+
 ## 📁 Project structure
 
 ```text
@@ -444,6 +531,10 @@ RAM_MD/
 | Bot sleeps or stops | Hosting plan, worker type, process logs |
 | Media command fails | ffmpeg, external service limits, permissions |
 | Plugins missing | Plugin load errors in console; pull latest commits and restart |
+| OCR not configured | Set `OCR_SPACE_API_KEY`; reply to an image with `.ocr` |
+| Welcome/goodbye missing | Enable with `.welcome on` / `.goodbye on`; check participant events |
+| Anti-link cannot delete | Give the bot group admin rights; test with a non-admin account |
+| Reminders disappear | They are in memory and reset when the process restarts |
 | AI utilities fail | Check `AI_KEY_GROQ` / `AI_KEY_OPENAI`, provider quota and `.aitest` |
 | Movie command fails | Check `TMDB_API_KEY` is the API Read Access Token |
 | Mini-game answer rejected | Use the matching answer command within 10 minutes; one active game per chat |
