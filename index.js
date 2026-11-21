@@ -16,6 +16,7 @@ const plugins = new Map();
 let starting = false;
 let reconnectTimer = null;
 let reconnectDelay = 5000;
+let connectionNoticeSent = false;
 
 // ---------- Plugin loader ----------
 function loadPlugins() {
@@ -132,6 +133,48 @@ async function start() {
     if (connection === 'open') {
       reconnectDelay = 5000;
       console.log('Connected as', sock.user.id);
+      if (config.connectionMessage !== false && !connectionNoticeSent) {
+        connectionNoticeSent = true;
+        const botJid = jidNormalizedUser(sock.user.id);
+        const ownerNumber = (config.owners || []).find(n => /^\\d{7,15}$/.test(String(n)));
+        const destination = ownerNumber ? ownerNumber + '@s.whatsapp.net' : botJid;
+        const started = new Date().toLocaleString('en-GB', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
+        const notice = [
+          '╭━━━〔 ⚡ RAM-MD ONLINE 〕━━━╮',
+          '┃ ✅ *BOT CONNECTED SUCCESSFULLY*',
+          '╰━━━━━━━━━━━━━━━━━━━━╯',
+          '',
+          '🤖 *Bot Name:* ' + (config.botName || 'RAM-MD'),
+          '👑 *Owner:* ' + (config.ownerName || 'Not set'),
+          '📱 *Bot Number:* ' + botJid.split('@')[0].split(':')[0],
+          '🏷️ *Version:* ' + (config.version || '1.0.0'),
+          '🔰 *Prefix:* ' + (config.prefix || '.'),
+          '📦 *Loaded Commands:* ' + plugins.size,
+          '🟢 *Status:* Online',
+          '🕒 *Connected (IST):* ' + started,
+          '',
+          '📜 *Menu:* ' + (config.prefix || '.') + 'menu',
+          '🌐 *Website:* https://ram-md.blogspot.com/',
+          '💬 *Support:* https://t.me/Ramboss67',
+          '',
+          '✨ RAM-MD is ready to use!'
+        ].join('\\n');
+        try {
+          if (config.menuImage) {
+            try {
+              await sock.sendMessage(destination, { image: { url: config.menuImage }, caption: notice });
+            } catch (imageError) {
+              console.log('Startup image unavailable; sending text:', imageError.message);
+              await sock.sendMessage(destination, { text: notice });
+            }
+          } else {
+            await sock.sendMessage(destination, { text: notice });
+          }
+          console.log('Startup confirmation sent to', destination);
+        } catch (noticeError) {
+          console.error('Startup confirmation failed:', noticeError.message);
+        }
+      }
     }
     if (connection === 'close') {
       const code = lastDisconnect?.error?.output?.statusCode;
