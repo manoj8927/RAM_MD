@@ -29,22 +29,43 @@ function buildMenu(plugins, config) {
     return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
   });
 
-  const bot = config.botName || 'Bot';
+  const bot = config.botName || 'RAM-MD';
+  const clean = (value) => String(value ?? '').replace(/[\r\n*]/g, ' ').trim();
+  const div = '━━━━━━━━━━━━━━━━━━━━';
+  const labels = {
+    Download: '📥 DOWNLOAD CENTER',
+    Games: '🎮 GAME ZONE',
+    Tools: '🛠️ SMART TOOLS',
+    Media: '🎬 MEDIA STUDIO',
+    Group: '👥 GROUP MANAGER',
+    Profile: '👤 PROFILE',
+    Settings: '⚙️ SETTINGS',
+    General: '✨ GENERAL',
+  };
   let out =
-    `┌─────〔 ${bot} 〕─────●\n` +
-    `├✦ *Owner:* ${config.ownerName || 'Owner'}\n` +
-    `├✦ *Commands:* ${total}\n` +
-    `├✦ *Runtime:* ${runtime(process.uptime())}\n` +
-    `├✦ *Prefix:* ${p}\n` +
-    `├✦ *Mode:* public\n` +
-    `├✦ *Version:* ${config.version || pkg.version || '1.0.0'}\n` +
-    `└──────────────────●\n`;
+    `╭───〔 ⚡ *${clean(bot)}* 〕───╮\n` +
+    `│  ✧ *PREMIUM BOT DASHBOARD*\n` +
+    `╰${div}╯\n\n` +
+    `╭─❖ *BOT INFORMATION*\n` +
+    `│ 👑 *Owner*   : ${clean(config.ownerName || 'Owner')}\n` +
+    `│ 📦 *Commands* : ${total}\n` +
+    `│ ⏳ *Uptime*   : ${runtime(process.uptime())}\n` +
+    `│ 🔑 *Prefix*   : ${clean(p)}\n` +
+    `│ 🌐 *Mode*     : Public\n` +
+    `│ 🚀 *Version*  : ${clean(config.version || pkg.version || '1.0.0')}\n` +
+    `╰${div}╯\n`;
 
   for (const c of cats) {
-    out += `\n『 ${c.toUpperCase()} 』\n┌──────────────●\n`;
-    for (const cmd of [...new Set(groups[c])]) out += `│ ⬡ *${cmd.toUpperCase()}*\n`;
-    out += `└──────────────●\n`;
+    const commands = [...new Set(groups[c])];
+    out += `\n╭─❖ *${labels[c] || '📂 ' + clean(c).toUpperCase()}*\n`;
+    for (const cmd of commands) {
+      out += `│  ◈ ${p}*${clean(cmd).toLowerCase()}*\n`;
+    }
+    out += `╰${div}╯\n`;
   }
+  out += `\n✦ *Powered by ${clean(bot)}*\n` +
+    `♡ *Made with love by SANJOY X TECH*\n` +
+    `⚡ _Fast • Smart • Reliable_`;
   return out.trim();
 }
 
