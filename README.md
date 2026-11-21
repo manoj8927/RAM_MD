@@ -109,6 +109,25 @@ If you see `[openai] 429: You have no credits remaining`, check API billing/quot
 
 **Never add a real API key to GitHub, README, config.js or screenshots.** The repository ignores `ai_key*.txt`.
 
+### 📱 OptiLink Node.js Panel — Groq AI setup (Android File Manager)
+
+If your panel shows `deploy/`, `lib/`, `plugins/`, `node_modules/`, `config.js`, `index.js` and `ai_key.txt`, you are in the project root.
+
+1. Open **Files → Create File** and name it `ai_key_groq.txt` in the **same directory as `config.js`**.
+2. Paste **only your private Groq API key** on one line; save. Do not paste it in GitHub, README, screenshots or chat. An environment variable named `AI_KEY_GROQ` is safer if the panel supports it.
+3. Open `config.js` and use:
+
+```js
+aiProvider: 'groq',
+aiFallback: [],
+```
+
+4. Restart the server. In WhatsApp send `.aitest` and `.ai Hello`.
+
+**Which key file?** `ai_key_groq.txt` is the unambiguous Groq-specific file. The existing `ai_key.txt` is a generic key file whose provider depends on the bot configuration. Do not rename or delete it without checking which service currently uses it. `node_modules/` is installed dependencies, not the location for keys.
+
+**README.md** is documentation only and does not start the bot. The startup command is `npm start` (or `node deploy/start.js` if the panel needs the script directly). Never run multiple bot processes with the same WhatsApp session.
+
 ## 🎬 Movie API — TMDB
 
 The `.movie` command shows a movie's **poster, title, release date, rating, genres, runtime, original language, director, cast, and story** using [The Movie Database (TMDB)](https://www.themoviedb.org/).
