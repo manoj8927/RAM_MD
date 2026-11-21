@@ -374,13 +374,47 @@ No extra API key or npm dependency is required.
 
 ### 🎮 Free Fire player info — [ffinfo.js](plugins/ffinfo.js)
 
+Get public Free Fire profile, banner metadata, guild details, and guild leader details from community services.
+
+**WhatsApp usage**
+
 ```text
 .ffinfo 123456789
+.ffinfo 123456789 ind
+.ffinfo 123456789 sg
+.ffinfo 123456789 br
 ```
 
-Looks up a **public Free Fire player profile** by its 5–15 digit UID. Displays player nickname, UID, region, level, likes, BR/CS rank codes and points, badges, account dates, EXP, banner/avatar/profile IDs, pet details, guild name/ID/level/EXP/member counts, guild leader UID/name/level/likes/ranks/banner ID, signature and credit score **when returned by the API**. Banner/avatar IDs are metadata, not rendered images. Missing fields show `Not available`. Rank codes are raw API values, not translated into named tiers.
+Replace `123456789` with a real **5–15 digit UID**. The optional region is `ind`, `sg`, or `br`; it is passed to providers that support a region parameter.
 
-The plugin first tries the third-party, no-key community endpoint `https://api2.nftoken.info/player-info?uid=...`, then retries recoverable HTTP 503/5xx errors and falls back to `https://api2.nftoken.info/get?uid=...`. If you privately set the optional environment variable `FF_COMMUNITY_API_KEY`, it can also try the separate FreeFireCommunity API (`https://developers.freefirecommunity.com/api/v1/info`) with region `ind`, `sg` or `br`. Example: `.ffinfo 123456789 ind`. The two no-key routes share a host and may fail together. The independent provider requires a key. No backup is guaranteed to be online. It is **not affiliated with Garena** and may be slow, inaccurate, offline, rate-limited or changed without notice. No password, login or account access is requested. Use only public player IDs; do not rely on this for security, ownership or ban-status decisions.
+| Section | Information shown when returned |
+| --- | --- |
+| 👤 Player | Nickname, UID, region, level, likes, EXP, badges, creation and last-login dates |
+| 🖼️ Profile | Banner ID, avatar ID, profile ID, Elite Pass |
+| 🏆 Ranks | BR/CS rank codes and points, maximum rank, season ID |
+| 👥 Guild | Guild name, ID, region, level, EXP, member count, capacity and leader UID |
+| 👑 Guild leader | Name, UID, level, likes, BR/CS rank codes, banner ID |
+| 🐾 Other | Pet name and level, signature, credit score |
+
+**Note:** Banner/avatar IDs are *not* actual banner/profile images. Missing API fields display `Not available`; rank codes are raw API values.
+
+**Automatic fallback / HTTP 503 handling**
+
+1. Primary: `https://api2.nftoken.info/player-info?uid=...`
+2. Backup: `https://api2.nftoken.info/get?uid=...`
+3. Optional independent provider: `https://developers.freefirecommunity.com/api/v1/info` (requires `FF_COMMUNITY_API_KEY`).
+
+The bot retries HTTP 429/500/502/503/504 once before trying the next source. Requests have a 10-second timeout per attempt. **The two no-key URLs use the same host** and may both return HTTP 503; a backup URL does not guarantee success.
+
+To enable the optional keyed provider, add this to your Node.js panel's **Environment Variables** (never commit the real value):
+
+```dotenv
+FF_COMMUNITY_API_KEY=YOUR_PRIVATE_API_KEY
+```
+
+Then restart the bot. If all sources fail, check the Node.js console for `[ffinfo] All APIs failed:` and the individual HTTP error codes. Use a real UID when testing.
+
+These are **unofficial third-party APIs**, not Garena services. Their routes, response fields, access requirements, uptime and accuracy may change. The fallback integrations have not been verified against a live player response. The command never needs a Free Fire password or account login.
 
 ### 🎮 Fun pack — [fun-pack.js](plugins/fun-pack.js)
 
