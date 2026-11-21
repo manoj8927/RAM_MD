@@ -268,6 +268,7 @@ The bot uses the number configured in `config.js`. Keep `auth/` private and pers
 | `.ai hello` | Ask AI a question |
 | `.aitest` | Test AI providers |
 | `.movie <name>` | Movie poster, rating, cast and story |
+| `.ffinfo <UID>` | Public Free Fire player profile (unofficial API) |
 | `.autoreply on` / `.autoreply off` | Toggle automatic AI replies |
 | `.autoreply status` | Check AI auto-reply |
 | `.areact on` / `.areact off` | Toggle automatic reactions |
@@ -351,6 +352,16 @@ No extra API key or npm dependency is required.
 | `.timestamp` | UTC ISO time and Unix timestamps |
 
 **Privacy:** Avoid posting real passwords, secrets or confidential text in group chats or sending them to third-party AI services.
+
+### 🎮 Free Fire player info — [ffinfo.js](plugins/ffinfo.js)
+
+```text
+.ffinfo 123456789
+```
+
+Looks up a **public Free Fire player profile** by its 5–15 digit UID. Displays player nickname, UID, region, level, likes, BR/CS rank codes and points, badges, account dates, guild information, signature and credit score **when returned by the API**. Missing fields show `Not available`. Rank codes are raw API values, not translated into named tiers.
+
+The plugin uses the third-party, no-key community endpoint `https://api2.nftoken.info/player-info?uid=...`. It is **not affiliated with Garena** and may be slow, inaccurate, offline, rate-limited or changed without notice. No password, login or account access is requested. Use only public player IDs; do not rely on this for security, ownership or ban-status decisions.
 
 ### 🎮 Fun pack — [fun-pack.js](plugins/fun-pack.js)
 
