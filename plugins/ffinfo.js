@@ -4,6 +4,46 @@ const API='https://api2.nftoken.info/player-info';
 const pick=(obj,...keys)=>{for(const k of keys)if(obj&&obj[k]!==undefined&&obj[k]!==null&&obj[k]!=='')return obj[k];return null;};
 const fmt=(x)=>x===null||x===undefined||x===''?'Not available':String(x).replace(/[\r\n\t*]/g,' ').slice(0,100);
 const when=x=>{if(x===null||x===undefined||x==='')return 'Not available';const n=Number(x);if(!Number.isFinite(n)||n<=0)return 'Not available';const d=new Date(n<1e12?n*1000:n);return Number.isNaN(d.getTime())?'Not available':d.toISOString().slice(0,10);};
+
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+async function requestInfo(url,headers){
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),10000);
+  try{
+    const res=await fetch(url,{headers:{Accept:'application/json','User-Agent':'RAM-MD/1.0 (+https://github.com/manoj8927/RAM_MD)',...headers},signal:controller.signal});
+    if(!res.ok){const err=new Error('HTTP '+res.status);err.status=res.status;throw err;}
+    const data=await res.json();
+    if(!data||typeof data!=='object'||data.error||data.success===false)throw Error('Invalid API response');
+    const basic=pick(data,'basicInfo','basicinfo','AccountInfo')||data;
+    if(!pick(basic,'nickname','AccountName','name')&&!pick(basic,'level','AccountLevel'))throw Error('No player profile in API response');
+    return data;
+  }
+}
+async function lookup(uid,region){
+  const encoded=encodeURIComponent(uid);
+  const sources=[
+    {name:'NFToken player-info',url:'https://api2.nftoken.info/player-info?uid='+encoded},
+    {name:'NFToken get',url:'https://api2.nftoken.info/get?uid='+encoded+(region?'&region='+region.toUpperCase():'')}
+  ];
+  const key=process.env.FF_COMMUNITY_API_KEY;
+  if(key){
+    const regions=region?[region]:['ind','sg','br'];
+    for(const r of regions)sources.push({name:'FreeFireCommunity '+r,url:'https://developers.freefirecommunity.com/api/v1/info?uid='+encoded+'&region='+r,headers:{'x-api-key':key}});
+  }
+  const errors=[];
+  for(const source of sources){
+    for(let attempt=0;attempt<2;attempt++){
+      try{return {data:await requestInfo(source.url,source.headers),source:source.name};}
+      catch(error){
+        errors.push(source.name+': '+error.message);
+        if(attempt===0&&[429,500,502,503,504].includes(error.status)){await wait(800);continue;}
+        break;
+      }
+    }
+  }
+  console.error('[ffinfo] All APIs failed:',errors.join(' | '));
+  throw Error('All Free Fire information providers unavailable');
+}
 module.exports={
  name:'ffinfo',
  command:['ffinfo'],
@@ -11,14 +51,11 @@ module.exports={
  category:'Games',
  desc:'Look up public Free Fire player profile by UID',
  async run({text,reply}){
-  const uid=String(text||'').trim();
-  if(!/^\d{5,15}$/.test(uid))return reply('🎮 *FREE FIRE PLAYER INFO*\n\nUsage: .ffinfo 123456789\nEnter a valid 5–15 digit player UID.');
-  const controller=new AbortController();
-  const timeout=setTimeout(()=>controller.abort(),12000);
+  const input=String(text||'').trim().split(/\s+/);
+  const uid=input[0],region=(input[1]||'').toLowerCase();
+  if(!/^\d{5,15}$/.test(uid)||region&&!['ind','sg','br'].includes(region))return reply('🎮 *FREE FIRE PLAYER INFO*\\nUsage: .ffinfo 123456789 [ind|sg|br]');
   try{
-   const res=await fetch(API+'?uid='+encodeURIComponent(uid),{headers:{Accept:'application/json','User-Agent':'RAM-MD-Bot/1.0'},signal:controller.signal});
-   if(!res.ok)throw Error('HTTP '+res.status);
-   const data=await res.json();
+   const {data,source}=await lookup(uid,region);
    if(data.success===false||data.error||data.message&&/not found|invalid uid/i.test(data.message))return reply('❌ Player not found or the community API could not retrieve this UID.');
    const basic=pick(data,'basicInfo','basicinfo','AccountInfo')||data;
    const clan=pick(data,'clanBasicInfo','clanbasicinfo','GuildInfo','guildInfo')||{};
@@ -80,6 +117,7 @@ module.exports={
     '🛡️ *Credit Score:* '+fmt(pick(credit,'creditScore','score')),
     '━━━━━━━━━━━━━━━━━━',
     'ℹ️ Banner/avatar IDs are not images. Unofficial API; missing data shows Not available.',
+    '🔌 *API:* '+source,
     '⚡ RAM-MD'
    ];
    return reply(lines.join('\n'));
