@@ -1,0 +1,8 @@
+node_modules/
+auth/
+data/
+tmp/
+bin/
+ai_key*.txt
+cookies*.txt
+*.log

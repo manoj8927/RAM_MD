@@ -1,0 +1,11 @@
+// Rename to yourplugin.js and put it in the plugins folder, then send .reload
+module.exports = {
+  name: 'hello',
+  command: ['hello', 'hi'],   // trigger words
+  category: 'Fun',            // menu group
+  desc: 'Say hello',          // menu description
+  owner: false,               // true = owner only
+  async run({ reply, args, text, sock, msg, from, isOwner }) {
+    await reply('Hello! ' + text);
+  },
+};

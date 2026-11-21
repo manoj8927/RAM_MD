@@ -1,0 +1,17 @@
+services:
+  - type: worker
+    name: ram-md-bot
+    runtime: node
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: BOT_STORAGE_DIR
+        value: /opt/render/project/src/storage
+      - key: AI_KEY_GROQ
+        sync: false
+    disk:
+      name: ram-md-session
+      mountPath: /opt/render/project/src/storage
+      sizeGB: 1
