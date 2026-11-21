@@ -136,7 +136,7 @@ async function start() {
       if (config.connectionMessage !== false && !connectionNoticeSent) {
         connectionNoticeSent = true;
         const botJid = jidNormalizedUser(sock.user.id);
-        const ownerNumber = (config.owners || []).find(n => /^\\d{7,15}$/.test(String(n)));
+        const ownerNumber = (config.owners || []).find(n => /^\d{7,15}$/.test(String(n)));
         const destination = ownerNumber ? ownerNumber + '@s.whatsapp.net' : botJid;
         const started = new Date().toLocaleString('en-GB', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
         const notice = [
@@ -158,7 +158,7 @@ async function start() {
           '💬 *Support:* https://t.me/Ramboss67',
           '',
           '✨ RAM-MD is ready to use!'
-        ].join('\\n');
+        ].join('\n');
         try {
           if (config.menuImage) {
             try {
