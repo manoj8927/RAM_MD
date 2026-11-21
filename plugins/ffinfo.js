@@ -24,6 +24,10 @@ module.exports={
    const clan=pick(data,'clanBasicInfo','clanbasicinfo','GuildInfo','guildInfo')||{};
    const social=pick(data,'socialInfo','socialinfo')||{};
    const credit=pick(data,'creditScoreInfo','creditscoreinfo')||{};
+   const leader=pick(data,'captainBasicInfo','captainbasicinfo','GuildLeaderInfo','guildLeaderInfo','leaderInfo')||{};
+   const pet=pick(data,'petInfo','petinfo')||{};
+   const profile=pick(data,'profileInfo','profileinfo')||{};
+   const rank=pick(data,'rankInfo','rankinfo')||{};
    const playerId=pick(basic,'accountId','accountid','AccountID','AccountId','player_id','uid')||uid;
    const name=pick(basic,'nickname','AccountName','name')||pick(data,'nickname');
    if(!name&&!pick(basic,'level','AccountLevel'))return reply('❌ No player details returned. Try another UID later.');
@@ -39,16 +43,43 @@ module.exports={
     '⚔️ *CS Rank Code:* '+fmt(pick(basic,'csRank','csrank')),
     '🎯 *CS Points:* '+fmt(pick(basic,'csRankingPoints','csrankingpoints')),
     '🎖️ *Badges:* '+fmt(pick(basic,'badgeCnt','badgecnt')),
+    '🎮 *EXP:* '+fmt(pick(basic,'exp','experience')),
+    '🖼️ *Banner ID:* '+fmt(pick(basic,'bannerId','bannerid','AccountBannerId')||pick(profile,'bannerId','bannerid')),
+    '🧑‍🎨 *Avatar ID:* '+fmt(pick(basic,'headPic','headpic','avatarId','avatarid')||pick(profile,'avatarId','avatarid')),
+    '🖼️ *Profile ID:* '+fmt(pick(basic,'profileId','profileid')||pick(profile,'profileId','profileid')),
+    '🎟️ *Elite Pass:* '+fmt(pick(basic,'hasElitePass','haselitepass','elitePass')),
+    '🏅 *BR Max Rank:* '+fmt(pick(basic,'maxRank','maxrank')||pick(rank,'maxRank')),
+    '🥇 *CS Max Rank:* '+fmt(pick(basic,'csMaxRank','csmaxrank')),
+    '🔥 *Season ID:* '+fmt(pick(basic,'seasonId','seasonid')),
     '📅 *Created:* '+when(pick(basic,'createAt','createat')),
     '🕒 *Last Login:* '+when(pick(basic,'lastLoginAt','lastloginat')),
     '━━━━━━━━━━━━━━━━━━',
-    '👥 *Guild:* '+fmt(pick(clan,'clanName','GuildName','guildName')),
+    '👥 *GUILD INFORMATION*',
+    '🏷️ *Guild Name:* '+fmt(pick(clan,'clanName','GuildName','guildName')),
+    '🆔 *Guild ID:* '+fmt(pick(clan,'clanId','clanid','GuildID','guildId')),
+    '🌍 *Guild Region:* '+fmt(pick(clan,'region','GuildRegion')),
+    '📈 *Guild EXP:* '+fmt(pick(clan,'clanExp','clanexp','GuildExp')),
+    '👑 *Guild Leader UID:* '+fmt(pick(clan,'captainId','captainid','leaderId','leaderid','GuildLeaderUID')),
     '🏰 *Guild Level:* '+fmt(pick(clan,'clanLevel','GuildLevel')),
     '👤 *Guild Members:* '+fmt(pick(clan,'memberNum','membernum')),
+    '👥 *Max Members:* '+fmt(pick(clan,'capacity','maxMembers','maxmembers')),
+    '━━━━━━━━━━━━━━━━━━',
+    '👑 *GUILD LEADER INFORMATION*',
+    '👤 *Leader Name:* '+fmt(pick(leader,'nickname','AccountName','name')),
+    '🆔 *Leader UID:* '+fmt(pick(leader,'accountId','accountid','AccountID','uid')||pick(clan,'captainId','captainid','leaderId')),
+    '⭐ *Leader Level:* '+fmt(pick(leader,'level','AccountLevel')),
+    '❤️ *Leader Likes:* '+fmt(pick(leader,'liked','likes','AccountLikes')),
+    '🏆 *Leader BR Rank:* '+fmt(pick(leader,'rank','ranking')),
+    '⚔️ *Leader CS Rank:* '+fmt(pick(leader,'csRank','csrank')),
+    '🖼️ *Leader Banner ID:* '+fmt(pick(leader,'bannerId','bannerid')),
+    '━━━━━━━━━━━━━━━━━━',
+    '🐾 *PET INFORMATION*',
+    '🐶 *Pet Name:* '+fmt(pick(pet,'name','petName','petname')),
+    '⭐ *Pet Level:* '+fmt(pick(pet,'level','petLevel','petlevel')),
     '📝 *Signature:* '+fmt(pick(social,'signature','Signature')),
     '🛡️ *Credit Score:* '+fmt(pick(credit,'creditScore','score')),
     '━━━━━━━━━━━━━━━━━━',
-    'ℹ️ Unofficial community API. Some details may be missing or outdated.',
+    'ℹ️ Banner/avatar IDs are not images. Unofficial API; missing data shows Not available.',
     '⚡ RAM-MD'
    ];
    return reply(lines.join('\n'));
