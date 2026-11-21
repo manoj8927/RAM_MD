@@ -526,6 +526,12 @@ npm start
 
 If the bot is already running, restart it from your hosting panel or PM2 instead of starting a duplicate process. Test `.menu`, `.github manoj8927/RAM_MD`, `.weather Kolkata`, `.quizbattle`, and `.poll Test | Yes | No` in a test group. These plugins have been committed but have **not been live-tested on a connected WhatsApp session**.
 
+### ⚙️ Advanced WhatsApp settings panel
+
+The owner can send `.settings` to view a categorized control panel with **10 toggles**: status seen, status react, AI auto reply, video quality selection, tap buttons, connection notification, AI introduction, AI web search, AI reply to owner, and debug logs.
+
+Reply within 10 minutes with `6 off` or send `.settings 6 off` directly. Use `.settings` to see the current numbered options. The settings are owner-only. Most settings persist in `data/settings.json`; AI auto-reply uses its own existing persistence mechanism. `AI Web Search` only has an effect with a supported provider/configuration, and the connection notice setting applies to future startup notifications.
+
 ## 📁 Project structure
 
 ```text
