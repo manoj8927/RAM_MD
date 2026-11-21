@@ -1,6 +1,7 @@
 // AI utilities built on the existing RAM-MD provider/fallback configuration.
 const ai = require('../lib/ai');
 const tasks = {
+  trt: ['Translate the user text accurately. If the first line starts with "to <language>:", translate to that language; otherwise translate to English. Output only the translation.', 'to Bengali: How are you?'],
   summarize: ['Summarize the supplied text accurately in concise bullet points. Preserve important facts and uncertainty.', 'Paste the text to summarize'],
   translate: ['Translate the user text accurately. If the first line starts with "to <language>:", translate to that language; otherwise translate to English. Output only the translation.', 'to Bengali: How are you?'],
   grammar: ['Correct spelling, grammar, and punctuation while preserving meaning and language. Return only the corrected text.', 'i has a new phone'],
