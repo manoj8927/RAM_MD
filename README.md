@@ -409,7 +409,7 @@ npm start
 
 For an already-running process, restart or redeploy it through your hosting panel instead of starting a second bot instance. The plugins were committed to GitHub, but successful live execution depends on your deployment and has not been verified here.
 
-## 🆕 Additional command packs — 31 commands
+## 🆕 Additional command packs — 30 commands
 
 These plugins are included in `plugins/` and load when the bot starts. The default prefix is `.`.
 
@@ -452,10 +452,11 @@ These commands reuse the existing AI provider setup and need an active AI key. P
 
 Changes to group settings and warning counts are saved in `data/group-extras.json`. Only group admins or the configured bot owner can modify settings, issue warnings or create polls. Warning counts do **not** automatically remove members. For anti-link message deletion the bot must be a group admin; if deletion is unavailable it may still send a warning. Welcome/goodbye depend on WhatsApp group participant events. Keep `data/` persistent.
 
-### 🎮 Challenge games — [challenge-games.js](plugins/challenge-games.js)
+### 🎮 Challenge games — [challenge-games.js](plugins/challenge-games.js) and [hangman.js](plugins/hangman.js)
 
 | Command | Example |
 | --- | --- |
+| `.hangman` | Start word game; guess `.hangman a`; restart `.hangman new` |
 | `.emojiquiz` | Start emoji category quiz; answer `.emojiquiz fruits` |
 | `.fasttype` | Start exact-text typing challenge; answer with `.fasttype <phrase>` |
 | `.numberbattle` | Guess 1–20; answer `.numberbattle 10` |
