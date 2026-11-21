@@ -21,6 +21,7 @@ A Node.js WhatsApp bot powered by Baileys, with owner controls, AI fallback, sta
 - [✨ Features](#-features)
 - [⚡ Quick start](#-quick-start)
 - [🤖 AI setup — Groq and OpenAI](#-ai-setup--groq-and-openai)
+- [🎬 Movie API — TMDB](#-movie-api--tmdb)
 - [🚀 Deployment](#-deployment)
 - [📱 WhatsApp pairing](#-whatsapp-pairing)
 - [📚 Commands](#-commands)
@@ -106,6 +107,44 @@ If you see `[openai] 429: You have no credits remaining`, check API billing/quot
 
 **Never add a real API key to GitHub, README, config.js or screenshots.** The repository ignores `ai_key*.txt`.
 
+## 🎬 Movie API — TMDB
+
+The `.movie` command shows a movie's **poster, title, release date, rating, genres, runtime, original language, director, cast, and story** using [The Movie Database (TMDB)](https://www.themoviedb.org/).
+
+### 🔑 Get a TMDB API token
+
+1. Create or sign in to your TMDB account at [themoviedb.org](https://www.themoviedb.org/).
+2. Open [TMDB API Settings](https://www.themoviedb.org/settings/api) and complete the API access setup.
+3. Copy the **API Read Access Token** (the longer bearer token), **not** the short v3 API key.
+4. In your hosting provider's **Secrets / Environment Variables**, add:
+
+```dotenv
+TMDB_API_KEY=YOUR_TMDB_API_READ_ACCESS_TOKEN
+```
+
+5. Save the variable and **restart or redeploy** RAM_MD.
+
+| Hosting | Where to add `TMDB_API_KEY` |
+| --- | --- |
+| Railway | Project → Bot Service → Variables |
+| Render | Service → Environment |
+| Replit | Secrets |
+| Heroku | App → Settings → Config Vars |
+| VPS / Pterodactyl | Secure process environment / panel environment settings |
+
+### 💬 WhatsApp commands
+
+```text
+.movie Pushpa 2
+.movie Jawan
+.movie Avengers Endgame
+.film Interstellar
+```
+
+The bot searches for a matching movie and sends the poster with details. It only provides **movie information**, not a movie download or streaming link. Results depend on TMDB's catalog and the selected title.
+
+**Troubleshooting:** If the bot says `Movie lookup is not configured yet`, check the `TMDB_API_KEY` variable and restart. If it reports invalid credentials, use the **API Read Access Token**. For missing titles, try a more precise movie name. Keep tokens private; never commit them to GitHub.
+
 ## 🚀 Deployment
 
 | Platform | Deployment file | Session persistence |
@@ -132,6 +171,7 @@ If you see `[openai] 429: You have no credits remaining`, check API billing/quot
 | `NODE_ENV` | `production` |
 | `BOT_STORAGE_DIR` | `/data` |
 | `AI_KEY_GROQ` | Your private Groq key |
+| `TMDB_API_KEY` | Your private TMDB API Read Access Token (for `.movie`) |
 
 4. Attach a **persistent volume** to the service and set its mount path to `/data`.
 5. Check that the start command is `npm start` (already specified in `railway.json`).
@@ -225,6 +265,7 @@ The bot uses the number configured in `config.js`. Keep `auth/` private and pers
 | `.settings` | Bot settings |
 | `.ai hello` | Ask AI a question |
 | `.aitest` | Test AI providers |
+| `.movie <name>` | Movie poster, rating, cast and story |
 | `.autoreply on` / `.autoreply off` | Toggle automatic AI replies |
 | `.autoreply status` | Check AI auto-reply |
 | `.areact on` / `.areact off` | Toggle automatic reactions |
