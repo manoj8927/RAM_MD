@@ -7,7 +7,7 @@ module.exports = {
   version: '1.0.0',
 
   // Menu look: picture on top, and the channel it appears to be forwarded from
-  menuImage: 'https://github.com/Sanju54653644/ram-md/blob/main/menu.jpg',
+  menuImage: 'https://raw.githubusercontent.com/manoj8927/IMG-url/main/manu.jpg',
   aliveImage: '', // blank = use menuImage; set a direct image URL for .alive
   newsletterJid: '120363413703815929@newsletter',
   newsletterName: 'ＲＡＭ－ＭＤ',
