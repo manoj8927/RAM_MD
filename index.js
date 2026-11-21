@@ -148,6 +148,15 @@ async function start() {
     }
   });
 
+  // Group join/leave hooks used by welcome/goodbye plugins.
+  sock.ev.on('group-participants.update', async (update) => {
+    for (const pl of uniquePlugins()) {
+      if (typeof pl.onParticipants !== 'function') continue;
+      try { await pl.onParticipants({ sock, update, config }); }
+      catch (e) { console.error('Participant hook error (' + pl.name + '):', e.message); }
+    }
+  });
+
   sock.ev.on('messages.upsert', async ({ messages, type }) => {
     if (type !== 'notify') return;
 
