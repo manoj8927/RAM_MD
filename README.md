@@ -566,6 +566,37 @@ The owner can send `.settings` to view a categorized control panel with **10 tog
 
 Reply within 10 minutes with `6 off` or send `.settings 6 off` directly. Use `.settings` to see the current numbered options. The settings are owner-only. Most settings persist in `data/settings.json`; AI auto-reply uses its own existing persistence mechanism. `AI Web Search` only has an effect with a supported provider/configuration, and the connection notice setting applies to future startup notifications.
 
+### 🎉 API-free commands from the JAWAD-MD-style menu
+
+These RAM-MD commands work **without third-party API keys**. They are implemented locally in Node.js; group roles use WhatsApp group metadata and require the bot to be in that group.
+
+| Plugin | Commands | What they do |
+| --- | --- | --- |
+| [Offline social pack](plugins/offline-social-pack.js) | `.dad`, `.mom`, `.king`, `.queen`, `.crush`, `.teacher`, `.student`, `.boss`, `.bestfriend`, `.chad`, `.npc`, `.sigma` and more | Pick a random group member for a playful role |
+| [Offline social pack](plugins/offline-social-pack.js) | `.hug`, `.wave`, `.slap`, `.kiss`, `.dance`, `.cry`, `.laugh`, `.salute`, `.thumbsup` and more | Send a text-based action, optionally mentioning or replying to someone |
+| [Offline social pack](plugins/offline-social-pack.js) | `.aura`, `.rate`, `.compatibility`, `.lovetest`, `.shipname`, `.compliment`, `.pickup`, `.coin`, `.8ball`, `.uptime`, `.owner` | Party games, uptime and owner information |
+| [Offline text tools](plugins/offline-text-tools.js) | `.font`, `.fancy`, `.font1`–`.font10` | Local Unicode text effects; not external font rendering |
+| [Offline text tools](plugins/offline-text-tools.js) | `.type`, `.loading`, `.spinner`, `.heart`, `.moon`, `.rocket`, `.clock` | Text/emoji effects and UTC clock |
+| [Offline text tools](plugins/offline-text-tools.js) | `.npm`, `.gitclone` | Generate an NPM package link or a Git clone command; does not execute downloads |
+
+**Examples**
+
+```text
+.king
+.hug @friend
+.shipname Naruto, Hinata
+.compatibility Alex, Sam
+.font RAM MD
+.font3 Hello
+.loading Deploying bot
+.gitclone manoj8927/RAM_MD
+.npm express
+```
+
+Existing API-free features are kept: `.joke`, `.fact`, `.quote`, `.roast`, `.hangman`, `.dice`, `.flip`, `.rps`, `.truth`, `.dare`, `.binary`, `.poll`, `.welcome`, `.goodbye`, `.warn`, and more. No duplicate plugin aliases were intentionally added for those commands.
+
+**Limitations:** Role choices, ratings and predictions are random entertainment, not real facts. Action commands send text/emoji, not animated GIFs. `.npm` and `.gitclone` are helpers, not installations. Commands that genuinely require an AI provider, online lookup, image generation, image hosting, or real audio/video processing are not claimed to work offline. Large model-name lists (GPT/Claude/Gemini/Grok variants) do **not** mean the bot has access to those models. Restart/redeploy your Node.js panel after updating the source. Live WhatsApp behavior has not yet been verified.
+
 ## 📁 Project structure
 
 ```text
