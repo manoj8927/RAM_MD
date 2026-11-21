@@ -1,6 +1,5 @@
 // Free Fire public player info lookup via third-party community API.
 // No login, token harvesting, account access, or game modification.
-const API='https://api2.nftoken.info/player-info';
 const pick=(obj,...keys)=>{for(const k of keys)if(obj&&obj[k]!==undefined&&obj[k]!==null&&obj[k]!=='')return obj[k];return null;};
 const fmt=(x)=>x===null||x===undefined||x===''?'Not available':String(x).replace(/[\r\n\t*]/g,' ').slice(0,100);
 const when=x=>{if(x===null||x===undefined||x==='')return 'Not available';const n=Number(x);if(!Number.isFinite(n)||n<=0)return 'Not available';const d=new Date(n<1e12?n*1000:n);return Number.isNaN(d.getTime())?'Not available':d.toISOString().slice(0,10);};
@@ -17,7 +16,7 @@ async function requestInfo(url,headers){
     const basic=pick(data,'basicInfo','basicinfo','AccountInfo')||data;
     if(!pick(basic,'nickname','AccountName','name')&&!pick(basic,'level','AccountLevel'))throw Error('No player profile in API response');
     return data;
-  }
+  }finally{clearTimeout(timeout);}
 }
 async function lookup(uid,region){
   const encoded=encodeURIComponent(uid);
@@ -124,6 +123,6 @@ module.exports={
   }catch(e){
    console.error('[ffinfo]',e.message);
    return reply('❌ Free Fire info service is unavailable or timed out. Try again later. No account login is required.');
-  }finally{clearTimeout(timeout);}
+  }
  }
 };
