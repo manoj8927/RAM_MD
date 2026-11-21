@@ -25,6 +25,7 @@ A Node.js WhatsApp bot powered by Baileys, with owner controls, AI fallback, sta
 - [🚀 Deployment](#-deployment)
 - [📱 WhatsApp pairing](#-whatsapp-pairing)
 - [📚 Commands](#-commands)
+- [🧩 New plugin packs](#-new-plugin-packs)
 - [📁 Project structure](#-project-structure)
 - [🛠️ Troubleshooting](#️-troubleshooting)
 - [🔒 Security](#-security)
@@ -34,13 +35,13 @@ A Node.js WhatsApp bot powered by Baileys, with owner controls, AI fallback, sta
 
 | Category | Included functionality |
 | --- | --- |
-| 🤖 AI | AI chat, automatic replies, provider fallback, `.aitest` |
+| 🤖 AI | AI chat, automatic replies, provider fallback, `.aitest`, translation (`.trt`), summaries, captions, grammar and quizzes |
 | 💬 WhatsApp | Pairing-code login, reconnect handling, owner commands |
 | ❤️ Status | Automatic status view and reactions |
-| 🎬 Media | YouTube/Instagram tools, audio/video handling, stickers |
+| 🎬 Media | YouTube, Instagram, Facebook and TikTok tools; movie details via TMDB; audio/video handling and stickers |
 | 👥 Groups | Group information, tagging and moderation commands |
-| 🎮 Games | RPS, dice, tic-tac-toe, car and snake |
-| 🛠️ Utilities | Runtime, settings, font converter, calculator |
+| 🎮 Games | RPS, dice, tic-tac-toe, car, snake, trivia, riddles, word scramble, math challenges and safe prank simulations |
+| 🛠️ Utilities | Runtime, settings, font converter, calculator, passwords, UUID, text stats, Base64, URL encoding, SHA-256 and JSON formatting |
 | 🧩 Plugins | Local plugin-based command system |
 
 Features can depend on external services, platform permissions and installed tools. Review third-party plugins before use.
@@ -284,13 +285,136 @@ The bot uses the number configured in `config.js`. Keep `auth/` private and pers
 
 Commands depend on loaded plugins, permissions and supported media/services.
 
+## 🧩 New plugin packs
+
+These plugins load from `plugins/` automatically when the bot starts. Run `.menu` for the current command list. Examples below use the default prefix `.`.
+
+### 🤖 AI utility pack — [ai-utility-pack.js](plugins/ai-utility-pack.js)
+
+Uses the existing `lib/ai.js` AI provider and fallback settings. Configure at least one supported AI key (for example `AI_KEY_GROQ` or `AI_KEY_OPENAI`) in hosting Secrets/Variables. No separate translation API is required.
+
+| Command | Example / purpose |
+| --- | --- |
+| `.summarize` | `.summarize Paste a long article here` — concise summary |
+| `.translate` | `.translate to Bengali: Hello friend` |
+| `.trt` | `.trt to Hindi: How are you?` — short translate alias |
+| `.grammar` | `.grammar i has a new phone` — spelling and grammar |
+| `.rewrite` | `.rewrite Please reply quickly` — professional rewrite |
+| `.explain` | `.explain What is Node.js?` |
+| `.caption` | `.caption Anime review` — social captions |
+| `.hashtags` | `.hashtags Action anime` |
+| `.email` | `.email Ask for a meeting next week` |
+| `.codehelp` | `.codehelp Explain async await` |
+| `.quiz` | `.quiz JavaScript basics` — five MCQs |
+
+For `.trt` / `.translate`, specify `to <language>:` to select the target language; without it the command defaults to English. AI requests have input and rate limits and may fail when provider credits or quotas are exhausted. Test provider connectivity with `.aitest`.
+
+### 🎬 Movie details — [movie.js](plugins/movie.js)
+
+```text
+.movie Pushpa 2
+.movie Jawan
+.film Interstellar
+```
+
+Returns a matching movie's poster (when available), rating, genres, runtime, release date, director, cast and synopsis. Requires the `TMDB_API_KEY` **API Read Access Token**; see [Movie API — TMDB](#-movie-api--tmdb). This is movie information, **not** a streaming or download command.
+
+### 📥 Social video downloads — [social-download.js](plugins/social-download.js)
+
+```text
+.facebook https://www.facebook.com/.../videos/...
+.fb https://www.facebook.com/.../videos/...
+.tiktok https://www.tiktok.com/@creator/video/...
+.tt https://www.tiktok.com/@creator/video/...
+```
+
+Uses the existing yt-dlp / ffmpeg download helpers for supported, accessible videos. Download success depends on URL format, platform restrictions, hosting tools and file-size limits. Download only content you have permission to access and follow platform rules.
+
+The separate [adult-download.js](plugins/adult-download.js) contains `.xnxx <URL>` and `.xvideos <URL>` for private-chat use and intentionally omits these from the public menu. These commands are not an age-verification system.
+
+### 🛠️ Utility pack — [utility-pack.js](plugins/utility-pack.js)
+
+No extra API key or npm dependency is required.
+
+| Command | Purpose |
+| --- | --- |
+| `.password 16` | Generate a random password (8–64 characters) |
+| `.uuid` | Generate a UUID v4 |
+| `.wordcount Hello World` | Count words, characters, bytes and lines |
+| `.base64 Hello` | Encode text as Base64 |
+| `.unbase64 SGVsbG8=` | Decode UTF-8 Base64 |
+| `.urlencode hello world` | URL-encode text |
+| `.urldecode hello%20world` | URL-decode text |
+| `.hash hello` | SHA-256 text hash (not encryption) |
+| `.jsonfmt {"name":"RAM-MD"}` | Pretty-print JSON |
+| `.timestamp` | UTC ISO time and Unix timestamps |
+
+**Privacy:** Avoid posting real passwords, secrets or confidential text in group chats or sending them to third-party AI services.
+
+### 🎮 Fun pack — [fun-pack.js](plugins/fun-pack.js)
+
+| Command | Purpose |
+| --- | --- |
+| `.fakevirus` | Clearly labeled fake-virus progress simulation |
+| `.matrix` | Random binary-code display |
+| `.lovepercent Alex, Sam` | Random love-match joke |
+| `.truth` | Truth question |
+| `.dare` | Lighthearted dare |
+| `.reverse hello` | Reverse text |
+| `.choose pizza, burger` | Pick a random option |
+| `.randomnum 1 100` | Random number in a range |
+
+### 🎭 Safe prank pack — [safe-prank-pack.js](plugins/safe-prank-pack.js)
+
+| Command | Simulation |
+| --- | --- |
+| `.fakeupdate` | Imaginary software update |
+| `.fakewifi` | Pretend Wi-Fi scan |
+| `.fakebattery` | Fictional battery booster |
+| `.fakesystem` | Pretend system diagnostics |
+| `.faketeleport` | Cartoon teleportation |
+| `.fakeai` | Silly mind-reading prediction |
+| `.fakecall Friend` | Fake incoming-call text |
+| `.fakefortune` | Random funny fortune |
+
+The separate [hack.js](plugins/hack.js) provides an owner-only `.hack` simulation. **All prank features are labeled fictional**; they do not hack accounts, scan networks, place calls, install updates, access files or modify devices. Progress simulations send multiple messages, so use them responsibly.
+
+### 🧠 Mini-game pack — [mini-game-pack.js](plugins/mini-game-pack.js)
+
+| Command | Purpose |
+| --- | --- |
+| `.coinflip` | Heads or tails |
+| `.roll 20` | Roll a 20-sided die (default: 6) |
+| `.eightball Will I win?` | Random magic 8-ball answer |
+| `.scramble` | Start word scramble |
+| `.unscramble banana` | Submit scramble answer |
+| `.riddle` | Start a riddle |
+| `.riddleanswer piano` | Submit riddle answer |
+| `.trivia` | Start a multiple-choice question |
+| `.triviaanswer 2` | Submit answer number (1–4) |
+| `.mathgame` | Start math challenge |
+| `.mathanswer 42` | Submit math answer |
+| `.gamestop` | Clear the active mini-game |
+
+Mini-games keep one active session per chat for up to 10 minutes and allow three wrong attempts. Sessions are in memory and reset when the bot restarts. No API key is required.
+
+### 🔄 Updating after new commands
+
+```bash
+git pull origin main
+npm install --omit=dev
+npm start
+```
+
+For an already-running process, restart or redeploy it through your hosting panel instead of starting a second bot instance. The plugins were committed to GitHub, but successful live execution depends on your deployment and has not been verified here.
+
 ## 📁 Project structure
 
 ```text
 RAM_MD/
 ├── assets/                 Images and media
 ├── lib/                    Shared helpers, AI and settings
-├── plugins/                WhatsApp bot commands
+├── plugins/                WhatsApp bot commands, including AI/game/prank/utility packs
 ├── deploy/
 │   └── start.js            Optional persistent-storage bootstrap
 ├── config.js               Bot settings (no secrets!)
@@ -319,7 +443,10 @@ RAM_MD/
 | Groq fails | `AI_KEY_GROQ`, provider quota, model and network |
 | Bot sleeps or stops | Hosting plan, worker type, process logs |
 | Media command fails | ffmpeg, external service limits, permissions |
-| Plugins missing | Plugin load errors in console |
+| Plugins missing | Plugin load errors in console; pull latest commits and restart |
+| AI utilities fail | Check `AI_KEY_GROQ` / `AI_KEY_OPENAI`, provider quota and `.aitest` |
+| Movie command fails | Check `TMDB_API_KEY` is the API Read Access Token |
+| Mini-game answer rejected | Use the matching answer command within 10 minutes; one active game per chat |
 
 ## 🍪 YouTube & Instagram cookies (optional)
 
