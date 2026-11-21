@@ -51,7 +51,7 @@ function panel(config) {
     '⏳ Reply session expires after 10 minutes.',
     '⚠️ AI Web Search requires supported Gemini setup.',
     '⚡ Powered by RAM-MD'
-  ].join('\\n');
+  ].join('\n');
 }
 
 module.exports = {
@@ -81,13 +81,13 @@ module.exports = {
 
   async run({ command, args, msg, from, config, reply }) {
     if (command === 'settings' || command === 'setting') {
-      const direct = /^(\\d{1,2})\\s+(on|off)$/i.exec(args.join(' ').trim());
+      const direct = /^(\d{1,2})\s+(on|off)$/i.exec(args.join(' ').trim());
       if (direct) {
         const item = ITEMS[Number(direct[1]) - 1];
         if (!item) return reply('❌ Invalid setting number. Use .settings to view all options.');
         const enabled = direct[2].toLowerCase() === 'on';
         item.set(config, enabled);
-        return reply('✅ ' + item.label + ': ' + state(enabled) + '\\n\\n' + panel(config));
+        return reply('✅ ' + item.label + ': ' + state(enabled) + '\n\n' + panel(config));
       }
       pending.set(from, { asker: senderOf(msg), expires: Date.now() + 10 * 60 * 1000 });
       return reply(panel(config));
