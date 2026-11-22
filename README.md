@@ -77,6 +77,14 @@ npm start
 
 The current `npm start` command runs `deploy/start.js`, which then starts `index.js`. If `BOT_STORAGE_DIR` is not set, `auth/` and `data/` use local storage.
 
+### 🌍 AI auto-reply: match the user's language
+
+The default in `config.js` is now `aiReplyLanguage: 'same'`. The AI is instructed to respond in the **same language and writing script** as the latest incoming message, including Bengali (বাংলা), Banglish (romanized Bengali), English, Hindi, Hinglish, Urdu, Arabic, Tamil, Telugu, Malayalam, Kannada, Gujarati, Punjabi, Nepali, Spanish, French, Portuguese, Indonesian, Japanese, Korean, Chinese and Russian.
+
+Examples: `তুমি কেমন আছো?` → Bengali script; `Tumi kemon acho?` → Banglish; `How are you?` → English; `आप कैसे हैं?` → Hindi. For mixed or very short messages, language detection can be uncertain; the AI uses context. Explicit requests to switch languages take precedence.
+
+The previous fixed English greeting shortcuts are bypassed in `same` mode so they cannot force English responses to Bengali/Banglish messages. This is **prompt-guided language matching**, not a translation API or a guarantee that every AI provider always follows the instruction. An existing custom `aiPrompt` overrides the default prompt; update that custom prompt too if needed. Requires a configured AI provider/key and restart after pulling changes.
+
 ## 🤖 AI setup — Groq and OpenAI
 
 ### Option A — Groq API (alternative when OpenAI credits run out)
