@@ -233,6 +233,10 @@ async function start() {
           continue;
         }
 
+        // Private mode: ignore non-owner messages in both groups and DMs.
+        // Owner can always use commands, including .public to switch back.
+        if (config.mode === 'private' && !isOwner(msg)) continue;
+
         // ----- Commands -----
         const text = getText(msg).trim();
         if (!text.startsWith(config.prefix)) {
