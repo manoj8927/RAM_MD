@@ -1,3 +1,14 @@
+### 🔐 Public / Private bot mode
+
+Owner-only commands: `.private`, `.public`, `.mode`, `.mode private`, `.mode public`.
+
+- **Public** (default): everyone can use non-owner commands in private chats and groups.
+- **Private**: only the owner can use bot commands and ordinary-message hooks (including AI auto-replies) in private chats or groups.
+- The mode is stored in `data/settings.json` and survives restart when the data directory is persistent.
+- Owner numbers must be correctly set in `config.js` (`owners`); otherwise use the paired bot's own account to recover access.
+- Existing group-participant welcome/goodbye events and status automation are separate background features and are not disabled by private mode.
+- `.public` does not override individual owner-only command restrictions or group admin permissions.
+
 <div align="center">
 
 # ⚡ 『ＲＡＭ－ＭＤ』 — WhatsApp Bot
