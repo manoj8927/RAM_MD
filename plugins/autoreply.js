@@ -99,6 +99,8 @@ function detectLanguage(text) {
 }
 function languageInstruction(config, text='') {
   const mode=String(config.aiReplyLanguage||'same').toLowerCase();
+  const codes = { bn:'Bengali script', en:'English', hi:'Hindi', ur:'Urdu', ar:'Arabic', ta:'Tamil', te:'Telugu', ml:'Malayalam', kn:'Kannada', gu:'Gujarati', pa:'Punjabi', ne:'Nepali', es:'Spanish', fr:'French', pt:'Portuguese', id:'Indonesian', ja:'Japanese', ko:'Korean', zh:'Chinese', ru:'Russian', 'bn-latn':'Banglish (Bengali in Latin letters)', 'hi-latn':'Hinglish (Hindi in Latin letters)' };
+  if(codes[mode]) return 'Reply in '+codes[mode]+', unless the user explicitly requests another language.';
   if(mode==='bengali') return 'Reply in Bengali script, unless the user explicitly asks for a different language.';
   if(mode==='banglish') return 'Reply in Banglish (Bengali using Latin letters), unless the user explicitly asks for a different language.';
   if(mode!=='same' && mode!=='auto') return 'Reply in '+config.aiReplyLanguage+', unless the user explicitly asks for another language.';
