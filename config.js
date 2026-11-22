@@ -39,7 +39,7 @@ module.exports = {
   aiPersona: 'friend',    // 'friend' = fun chat and time pass | 'assistant' = answers for the owner
   aiPrompt: '',           // or write the whole personality yourself here
   aiIntro: true,
-  aiReplyLanguage: 'English', // English | same | Bengali | Banglish; change this to customize replies
+  aiReplyLanguage: 'same', // auto-match: Bengali/Banglish/English/Hindi/Hinglish/Urdu/Arabic/Tamil/Telugu and more
   // Exact greeting rules are checked before AI. Edit the replies to customize them.
   autoReplyRules: [
     { match: '^(hi|hello|hey|h[ei]llo|how are you|how r u|kemon acho|kasa ho|kaisa ho)[!?., ]*$', replies: ['Hi! I am RAM-MD, your AI friend. How are you?', 'Hello! I am doing great. How can I help you today?'] },
