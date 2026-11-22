@@ -178,6 +178,7 @@ The bot searches for a matching movie and sends the poster with details. It only
 | 🖥️ Pterodactyl | Node.js egg | Use persistent server files |
 | 💻 VPS | [PM2 config](ecosystem.config.cjs) | Use persistent VPS disk |
 | ⚙️ OptiLink / Node.js panel | Manual setup | Check panel's storage and uptime |
+| 🤖 Bot Hosting dashboard | [bot-hosting.net/dash](https://bot-hosting.net/dash) | Check Node.js process, persistent storage and uptime |
 
 > **Important:** RAM_MD is a long-running WhatsApp process, not an HTTP website. A web-only or serverless host may require changes. Sleeping instances and ephemeral disks can interrupt the bot or erase pairing files. No platform is guaranteed to run free 24/7.
 
@@ -231,6 +232,10 @@ A worker with a persistent disk may require a paid plan. A free sleeping Web Ser
 ### 🔵 Koyeb
 
 Create a Node.js service from GitHub in [Koyeb](https://www.koyeb.com/). Use `npm install --omit=dev` for installation, `npm start` to run and `AI_KEY_GROQ` as a secret. Check current support for continuous workers and durable session files before production use.
+
+### 🤖 Bot Hosting dashboard
+
+Open the [Bot Hosting dashboard](https://bot-hosting.net/dash) to manage your hosting account. For RAM_MD, confirm Node.js support, a persistent background process and durable `auth/` / `data/` storage before deploying. This link is user-provided; hosting compatibility and 24/7 availability have not been independently verified.
 
 ### 🖥️ Pterodactyl / OptiLink / other Node.js panels
 
