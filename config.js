@@ -39,7 +39,12 @@ module.exports = {
   aiPersona: 'friend',    // 'friend' = fun chat and time pass | 'assistant' = answers for the owner
   aiPrompt: '',           // or write the whole personality yourself here
   aiIntro: true,
-  aiReplyLanguage: 'same', // auto-match: Bengali/Banglish/English/Hindi/Hinglish/Urdu/Arabic/Tamil/Telugu and more
+  aiReplyLanguage: 'same', // auto-detect; or use 'bn' (Bengali), 'en' (English), 'hi' (Hindi), 'bn-latn' (Banglish), 'hi-latn' (Hinglish), etc.
+  // Language short codes: same=auto, bn=Bangla, en=English, hi=Hindi, ur=Urdu, ar=Arabic,
+  // ta=Tamil, te=Telugu, ml=Malayalam, kn=Kannada, gu=Gujarati, pa=Punjabi,
+  // ne=Nepali, es=Spanish, fr=French, pt=Portuguese, id=Indonesian,
+  // ja=Japanese, ko=Korean, zh=Chinese, ru=Russian.
+  // Set aiReplyLanguage to one of these codes to force that language; 'same' follows the sender.
   // Exact greeting rules are checked before AI. Edit the replies to customize them.
   autoReplyRules: [
     { match: '^(hi|hello|hey|h[ei]llo|how are you|how r u|kemon acho|kasa ho|kaisa ho)[!?., ]*$', replies: ['Hi! I am RAM-MD, your AI friend. How are you?', 'Hello! I am doing great. How can I help you today?'] },
