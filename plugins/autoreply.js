@@ -70,12 +70,40 @@ function hint(e) {
 const pickBusy = (jid) => { try { return !!require('../lib/choice').hasOffer(jid); } catch (e) { return false; } };
 const isInbox = (jid) => /@(s\.whatsapp\.net|lid)$/.test(jid || '');
 
-function languageInstruction(config) {
-  const lang = String(config.aiReplyLanguage || 'same').toLowerCase();
-  if (lang === 'same') return 'Reply in the same language and script as the latest user message.';
-  if (lang === 'bengali') return 'Always reply in Bengali script.';
-  if (lang === 'banglish') return 'Always reply in Banglish using English letters.';
-  return `Always reply in ${config.aiReplyLanguage}.`;
+function detectLanguage(text) {
+  const t=String(text||'').trim();
+  if (/[\u0980-\u09FF]/u.test(t)) return 'Bengali';
+  if (/[\u0900-\u097F]/u.test(t)) return 'Hindi';
+  if (/[\u0600-\u06FF]/u.test(t)) return 'Urdu or Arabic (identify from words)';
+  if (/[\u0B80-\u0BFF]/u.test(t)) return 'Tamil';
+  if (/[\u0C00-\u0C7F]/u.test(t)) return 'Telugu';
+  if (/[\u0D00-\u0D7F]/u.test(t)) return 'Malayalam';
+  if (/[\u0C80-\u0CFF]/u.test(t)) return 'Kannada';
+  if (/[\u0A80-\u0AFF]/u.test(t)) return 'Gujarati';
+  if (/[\u0A00-\u0A7F]/u.test(t)) return 'Punjabi';
+  if (/[\u3040-\u30FF\u4E00-\u9FFF]/u.test(t)) return 'Japanese or Chinese (identify from words)';
+  if (/[\uAC00-\uD7AF]/u.test(t)) return 'Korean';
+  if (/[\u0400-\u04FF]/u.test(t)) return 'Russian or another Cyrillic language';
+  if (/[\u0E00-\u0E7F]/u.test(t)) return 'Thai';
+  if (/[\u0370-\u03FF]/u.test(t)) return 'Greek';
+  if (/[\u0590-\u05FF]/u.test(t)) return 'Hebrew';
+  if (/[\u0041-\u007A]/u.test(t)) {
+    const words=t.toLowerCase().replace(/[^a-z\s]/g,' ').split(/\s+/).filter(Boolean);
+    const romanBangla=/^(ami|tumi|tui|apni|amar|tomar|hamar|kemon|acho|achi|kothay|kothai|koto|korbo|koro|kor|hobe|hoba|bhalo|valo|bhalobashi|bangla|banglay|ki|keno|kano|nai|nei|acha|accha|bol|bolo|dakho|dekh|dao|deba|dibo|hoy|hoye|ekta|akta|ta|gulo|kotha|khabo|khawa|ghum|ghumao|bhai|dada|taka|lagbe|lagba|parbo|paro|pare|thik|ajke|kalke|aj|kal|onek|shundor|sundor|dhonnobad|shuvo|ratri|sokal|bikel|ranna|bari|kobe|jabo|jabe|jabi|ashe|asbe|chao|chai|chilo|chilo|holo|hocche|hoche|bolta|chai|korta|cha|rokom|ar|na|ni)$/;
+    const romanHindi=/^(mera|mujhe|tumhara|tumhe|kaise|kaisa|kya|kyun|nahi|haan|hai|hoon|aap|apka|karna|karo|batao|bata|accha|theek|bahut|shukriya|namaste|kal|aaj|bhai|yaar|kahan|kab|kaun|kyu|mujhko|hoga|hogi)$/;
+    const bn=words.filter(w=>romanBangla.test(w)).length,hi=words.filter(w=>romanHindi.test(w)).length;
+    if (bn>=2 && bn>hi) return 'Banglish (Bengali written in Latin letters)';
+    if (hi>=2 && hi>bn) return 'Hinglish (Hindi written in Latin letters)';
+  }
+  return 'auto';
+}
+function languageInstruction(config, text='') {
+  const mode=String(config.aiReplyLanguage||'same').toLowerCase();
+  if(mode==='bengali') return 'Reply in Bengali script, unless the user explicitly asks for a different language.';
+  if(mode==='banglish') return 'Reply in Banglish (Bengali using Latin letters), unless the user explicitly asks for a different language.';
+  if(mode!=='same' && mode!=='auto') return 'Reply in '+config.aiReplyLanguage+', unless the user explicitly asks for another language.';
+  const detected=detectLanguage(text);
+  return 'Match the language AND writing script of the CURRENT user message, not the previous conversation or your own last reply. '+(detected==='auto'?'Identify the language from the user’s actual wording. If the message is short or ambiguous, infer from nearby user turns; do not assume English solely because Latin letters are used.':'The current message appears to be '+detected+'.')+' Bengali script → Bengali script; Banglish → Banglish (Latin letters); English → English; Hindi → Hindi; Hinglish → Hinglish; Urdu → Urdu; Arabic → Arabic; Tamil → Tamil; Telugu → Telugu; Malayalam → Malayalam; Kannada → Kannada; Gujarati → Gujarati; Punjabi → Punjabi; Nepali → Nepali; Spanish → Spanish; French → French; Portuguese → Portuguese; Indonesian → Indonesian; Japanese → Japanese; Korean → Korean; Chinese → Chinese; Russian → Russian. For mixed messages, follow the dominant language, and follow any explicit language request. Do not switch to English just because the model or history used English.';
 }
 
 // Who the AI is. "friend" (default): a fun, chatty companion for time pass and gossip, with no
@@ -90,7 +118,7 @@ function systemPrompt(config, opts = {}) {
     return (
       `তুমি ${name}, ${owner}-এর AI সহকারী। তুমি WhatsApp-এ ${owner}-এর হয়ে মানুষের মেসেজের উত্তর দাও।\n` +
       `নিয়ম:\n` +
-      `- ${languageInstruction(config)} If the user explicitly requests another language, follow that request.\n` +
+      `- ${languageInstruction(config, opts.text || '')} If the user explicitly requests another language, follow that request.\n` +
       `- উত্তর ছোট, বন্ধুত্বপূর্ণ ও পরিষ্কার রাখো (সর্বোচ্চ ৩-৪ বাক্য)। সাধারণ চ্যাটের লেখা, কোনো markdown বা তালিকার চিহ্ন (#, **) নয়।\n` +
       `- কেউ জানতে চাইলে স্পষ্ট বলো যে তুমি একটি AI, মানুষ নও।\n` +
       `- যা জানো না তা বানিয়ে বোলো না। ${owner}-এর ব্যক্তিগত তথ্য, টাকাপয়সা বা কোনো সিদ্ধান্ত নিয়ে প্রতিশ্রুতি দিও না; বলো যে ${owner} নিজে পরে জানাবেন।\n` +
@@ -102,7 +130,7 @@ function systemPrompt(config, opts = {}) {
     `You are ${name}, a fun, chatty AI friend on WhatsApp. You chat, gossip lightly, joke around and pass time with people. ` +
     `You are not anyone's assistant: you never take messages for someone, never say you will tell someone something, and never bring up an absent person. You are simply ${name}, always here.\n\n` +
     `How you write:\n` +
-    `- ${languageInstruction(config)}\n` +
+    `- ${languageInstruction(config, opts.text || '')}\n` +
     `- Copy how formal they are: if they say "apni/আপনি" use it, if "tumi/তুমি" use it, if "tui/তুই" you may too. Default to "tumi".\n` +
     `- Short and natural like a real chat: 1 to 2 sentences, an emoji now and then, a little teasing or humour, and often a question back so the chat keeps going.\n` +
     `- If they want a story, joke or riddle, tell a short one right away.\n` +
@@ -173,7 +201,7 @@ async function answer({ sock, msg, from, text, config, intro, ticket }) {
   try {
     const friend = (config.aiPersona || 'friend') !== 'assistant';
     const first = !!intro && config.aiIntro !== false && friend;
-    out = clean(await ai.ask(config, { system: systemPrompt(config, { first }), history, text: text.slice(0, 1500) }));
+    out = clean(await ai.ask(config, { system: systemPrompt(config, { first, text }), history, text: text.slice(0, 1500) }));
   } catch (e) {
     lastError = describe(e);
     console.log('AI reply failed:', lastError);
@@ -204,7 +232,7 @@ module.exports = {
   priority: 0, // runs after the plugins that wait for a numbered reply
   isOn, // used by the .settings panel
   setEnabled(v) { state.enabled = !!v; if (!v) generation++; save(); },
-  systemPrompt, clean, // exported for testing
+  systemPrompt, clean, detectLanguage, // exported for testing
 
   // Called for every normal (non-command) message that is not from the bot itself
   async onMessage({ sock, msg, from, text, config, isOwner }) {
@@ -233,7 +261,7 @@ module.exports = {
     const next = previous.then(async () => {
       await new Promise((r) => setTimeout(r, 800 + Math.random() * 700)); // a human-like pause
       if (!isOn(config) || ticket !== generation) return;
-      const custom = customReply(config, text);
+      const custom = String(config.aiReplyLanguage || 'same').toLowerCase() === 'same' ? null : customReply(config, text);
       if (custom) {
         remember(from, 'user', text.slice(0, 1500));
         remember(from, 'assistant', custom);
