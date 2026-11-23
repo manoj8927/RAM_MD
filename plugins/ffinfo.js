@@ -29,9 +29,10 @@ module.exports = {
   async run({ args, reply }) {
     const uid = String(args[0] || '').trim();
     if (!/^\d{6,15}$/.test(uid)) return reply('🎮 Usage: .ffinfo 19191758817');
-    if (!process.env.FFINFO_API_URL) return reply('⚠️ Free Fire info API is not configured. Owner: set FFINFO_API_URL.');
+    // Public endpoint confirmed working by bot owner; optional environment override.
+    const apiUrl = process.env.FFINFO_API_URL || 'https://api2.nftoken.info/player-info';
     try {
-      const url = new URL(process.env.FFINFO_API_URL);
+      const url = new URL(apiUrl);
       if (url.protocol !== 'https:') return reply('⚠️ FFINFO_API_URL must use HTTPS.');
       url.searchParams.set('uid', uid);
       const json = await fetchJSON(url, process.env.FFINFO_API_KEY);
