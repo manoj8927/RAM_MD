@@ -23,12 +23,12 @@ function fetchJSON(url, apiKey) {
 
 module.exports = {
   name: 'ffinfo',
-  command: ['ffinfo'],
+  command: ['ffinfo', 'uid', 'id'],
   category: 'Games',
   desc: 'Show Free Fire player information by UID',
   async run({ args, reply }) {
     const uid = String(args[0] || '').trim();
-    if (!/^\d{6,15}$/.test(uid)) return reply('🎮 Usage: .ffinfo 19191758817');
+    if (!/^\d{5,15}$/.test(uid)) return reply('🎮 Usage: .ffinfo 19191758817');
     // Public endpoint confirmed working by bot owner; optional environment override.
     const apiUrl = process.env.FFINFO_API_URL || 'https://api2.nftoken.info/player-info';
     try {
@@ -36,29 +36,34 @@ module.exports = {
       if (url.protocol !== 'https:') return reply('⚠️ FFINFO_API_URL must use HTTPS.');
       url.searchParams.set('uid', uid);
       const json = await fetchJSON(url, process.env.FFINFO_API_KEY);
-      if (json.success === false || json.error) return reply('❌ Player not found or API error.');
+      if (json.success === false || json.error || json.status === 'error') return reply('❌ API error: ' + String(json.message || json.error || 'Player not found').slice(0,180));
       const data = json.data || json.player || json;
+      const basic = data.basicInfo || data.BasicInfo || data.AccountInfo || data.accountInfo || data;
+      const profile = data.profileInfo || data.AccountProfileInfo || data;
       if (!data || typeof data !== 'object') return reply('❌ No player information returned.');
       const value = (...keys) => {
         for (const key of keys) {
-          const v = data[key];
+          const v = basic[key] ?? profile[key] ?? data[key];
           if (v !== null && v !== undefined && typeof v !== 'object' && String(v).trim()) return String(v);
         }
         return 'N/A';
       };
+      if (value('nickname', 'name', 'playerName', 'AccountName') === 'N/A' && value('level', 'playerLevel', 'AccountLevel') === 'N/A') {
+        return reply('⚠️ API responded but player data was not recognized. Check UID or server region.');
+      }
       return reply(
         '🎮 *RAM-MD | FREE FIRE INFO*\n\n' +
         '🆔 UID: ' + uid + '\n' +
-        '👤 Name: ' + value('nickname', 'name', 'playerName') + '\n' +
-        '🌍 Region: ' + value('region', 'server') + '\n' +
-        '⭐ Level: ' + value('level', 'playerLevel') + '\n' +
-        '❤️ Likes: ' + value('likes', 'liked') + '\n' +
-        '🏆 BR Rank: ' + value('brRank', 'rank') + '\n' +
-        '⚔️ CS Rank: ' + value('csRank') + '\n\n⚡ Powered by RAM-MD'
+        '👤 Name: ' + value('nickname', 'name', 'playerName', 'AccountName') + '\n' +
+        '🌍 Region: ' + value('region', 'server', 'AccountRegion') + '\n' +
+        '⭐ Level: ' + value('level', 'playerLevel', 'AccountLevel') + '\n' +
+        '❤️ Likes: ' + value('likes', 'liked', 'AccountLikes') + '\n' +
+        '🏆 BR Rank: ' + value('brRank', 'rank', 'BrMaxRank') + '\n' +
+        '⚔️ CS Rank: ' + value('csRank', 'CsMaxRank') + '\n\n⚡ Powered by RAM-MD'
       );
     } catch (e) {
       console.error('ffinfo:', e.message);
-      return reply('❌ Could not fetch Free Fire info. Check API settings.');
+      return reply('❌ Free Fire API request failed: ' + String(e.message).slice(0,130));
     }
   }
 };
