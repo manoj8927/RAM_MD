@@ -125,11 +125,11 @@ module.exports = {
         'Please review the Gist source before approving.',
         '',
         '📝 *Approve command:*',
-        '\`' + p + 'plugin approve ' + id + '\`',
+        p + 'plugin approve ' + id,
         '',
         '⏳ *Valid for:* 10 minutes',
         '✨ *RAM-MD Plugin Manager*'
-      ].join('\\n'));
+      ].join('\n'));
     }
     return installFiles(files, reply, reloadPlugins, p);
   },
