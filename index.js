@@ -11,6 +11,29 @@ const path = require('path');
 const config = require('./config');
 require('./lib/store').applySaved(config); // settings changed from WhatsApp survive a restart
 
+// Prompt in the hosting console when no real phone number is configured.
+async function getPairingNumber() {
+  const configured = String(process.env.PHONE_NUMBER || config.phoneNumber || '').replace(/[^0-9]/g, '');
+  if (/^[1-9][0-9]{7,14}$/.test(configured)) return configured;
+  if (!process.stdin.isTTY) {
+    console.error('No valid WhatsApp number. Set PHONE_NUMBER in hosting Startup environment (country code + number, no +).');
+    return null;
+  }
+  const readline = require('readline');
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  try {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const entered = await new Promise(resolve => rl.question(
+        '\\n📱 Please enter your WhatsApp number\\nExample: 917047XXXXXX\\nEnter number: ', resolve
+      ));
+      const number = String(entered || '').replace(/[\\s+()-]/g, '');
+      if (/^[1-9][0-9]{7,14}$/.test(number)) return number;
+      console.log('Invalid number. Enter country code and number, digits only (8-15 digits).');
+    }
+    return null;
+  } finally { rl.close(); }
+}
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const plugins = new Map();
 let starting = false;
@@ -129,10 +152,17 @@ async function start() {
 
   starting = false;
   if (!sock.authState.creds.registered) {
+    // Give the socket time to initialize, then ask for the number if missing.
     setTimeout(async () => {
       try {
-        const code = await sock.requestPairingCode(config.phoneNumber);
-        console.log('Pairing code:', code);
+        const phoneNumber = await getPairingNumber();
+        if (!phoneNumber) {
+          console.error('Pairing skipped: no valid number. Set PHONE_NUMBER and restart, or use an interactive console.');
+          return;
+        }
+        const code = await sock.requestPairingCode(phoneNumber);
+        console.log('\\n🔐 Pairing code:', code);
+        console.log('WhatsApp > Linked devices > Link a device > Link with phone number instead.');
       } catch (e) {
         console.error('Pairing failed:', e.message);
       }
