@@ -135,9 +135,21 @@ async function installFiles(files, reply, reloadPlugins, p) {
       fs.writeFileSync(full, code);
       try {
         delete require.cache[require.resolve(full)];
-        const mod = require(full);
-        if (!mod.command || typeof mod.run !== 'function') throw new Error('wrong format (needs "command" and "run")');
-        installed.push(file);
+        const adapter = require('../lib/levanter-adapter');
+        const previousModule = global.Module;
+        const before = adapter.registrations.length;
+        let mod;
+        try {
+          global.Module = adapter.register;
+          mod = require(full);
+        } finally {
+          if (previousModule === undefined) delete global.Module;
+          else global.Module = previousModule;
+        }
+        const compatible = adapter.registrations.splice(before);
+        if ((!mod || !mod.command || typeof mod.run !== 'function') && !compatible.length)
+          throw new Error('No RAM_MD command/run or supported Levanter Module registration');
+        installed.push(file + (compatible.length ? ' (Levanter: ' + compatible.map(x=>x.name).join(', ') + ')' : ''));
       } catch (e) {
         if (backup) fs.writeFileSync(full, backup); else fs.unlinkSync(full);
         await reply(`Skipped ${file}: ${e.message}`);
@@ -145,5 +157,5 @@ async function installFiles(files, reply, reloadPlugins, p) {
     }
     reloadPlugins();
     if (installed.length) await reply('Installed: ' + installed.join(', ') + `\\nSend ${p}menu to see it.`);
-    else await reply('No compatible plugins installed. This bot requires exports with command and run.');
+    else await reply('No compatible plugins installed. Supported: RAM_MD command/run or basic Levanter Module({pattern}, handler).');
 }
