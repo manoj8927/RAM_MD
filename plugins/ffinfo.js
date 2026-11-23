@@ -57,8 +57,8 @@ module.exports = {
         '👤 Name: ' + value('nickname', 'name', 'playerName', 'AccountName') + '\n' +
         '🌍 Region: ' + value('region', 'server', 'AccountRegion') + '\n' +
         '⭐ Level: ' + value('level', 'playerLevel', 'AccountLevel') + '\n' +
-        '❤️ Likes: ' + value('likes', 'liked', 'AccountLikes') + '\n' +
-        '🏆 BR Rank: ' + value('brRank', 'rank', 'BrMaxRank') + '\n' +
+        '❤️ Likes: ' + value('liked', 'likes', 'AccountLikes') + '\n' +
+        '🏆 BR Rank: ' + value('rank', 'brRank', 'BrMaxRank') + '\n' +
         '⚔️ CS Rank: ' + value('csRank', 'CsMaxRank') + '\n\n⚡ Powered by RAM-MD'
       );
     } catch (e) {
