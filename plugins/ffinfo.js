@@ -98,10 +98,20 @@ module.exports = {
       sections.push('⭐ Pet Level: ' + (pet.level ?? pet.petLevel ?? 'N/A'));
       sections.push('', '⚡ Powered by RAM-MD');
       const formatTime = (raw) => {
-        if (!/^\\d{10,13}$/.test(String(raw))) return raw;
-        const number = Number(raw);
-        const date = new Date(String(raw).length === 13 ? number : number * 1000);
-        return Number.isNaN(date.getTime()) ? raw : date.toISOString().slice(0, 10);
+        const input = String(raw ?? '').trim();
+        if (!/^\d{10}(\d{3})?$/.test(input)) return input || 'N/A';
+        const millis = Number(input) * (input.length === 10 ? 1000 : 1);
+        const date = new Date(millis);
+        if (Number.isNaN(date.getTime())) return 'N/A';
+        return new Intl.DateTimeFormat('en-IN', {
+          timeZone: 'Asia/Kolkata',
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        }).format(date) + ' IST';
       };
       sections.forEach((line, index) => {
         if (line.startsWith('🗓️ Created: ') || line.startsWith('🕒 Last Login: ')) {
