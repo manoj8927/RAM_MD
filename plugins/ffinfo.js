@@ -40,6 +40,9 @@ module.exports = {
       const data = json.data || json.player || json;
       const basic = data.basicInfo || data.BasicInfo || data.AccountInfo || data.accountInfo || data;
       const profile = data.profileInfo || data.AccountProfileInfo || data;
+      const social = data.socialInfo || data.SocialInfo || {};
+      const formatNumber = (raw) => /^\d+$/.test(String(raw)) ? Number(raw).toLocaleString('en-IN') : raw;
+      const bio = social.signature || social.bio || social.description || profile.signature || basic.signature || 'N/A';
       if (!data || typeof data !== 'object') return reply('❌ No player information returned.');
       const value = (...keys) => {
         for (const key of keys) {
@@ -60,7 +63,7 @@ module.exports = {
         '🌍 Region: ' + value('region', 'server', 'AccountRegion'),
         '⭐ Level: ' + value('level', 'playerLevel', 'AccountLevel'),
         '❤️ Likes: ' + value('liked', 'likes', 'AccountLikes'),
-        '📝 Bio: ' + value('signature', 'bio', 'description'),
+        '📝 Bio: ' + String(bio).replace(/[\r\n]+/g, ' ').slice(0, 350),
         '',
         '🏆 *RANK DETAILS*',
         '🥇 BR Rank: ' + value('rank', 'brRank', 'BrMaxRank'),
@@ -72,9 +75,9 @@ module.exports = {
         '📅 Season: ' + value('seasonId', 'season'),
         '',
         '📊 *ACCOUNT DETAILS*',
-        '🎖️ EXP: ' + value('exp', 'experience'),
-        '🪪 Badge ID: ' + value('badgeId'),
-        '🔖 Badge Count: ' + value('badgeCnt'),
+        '🎖️ EXP: ' + formatNumber(value('exp', 'experience')),
+        '🪪 Equipped Badge ID: ' + value('badgeId'),
+        '🏅 Badges Earned: ' + formatNumber(value('badgeCnt', 'badgeCount')),
         '🗓️ Created: ' + value('createAt', 'createdAt'),
         '🕒 Last Login: ' + value('lastLoginAt', 'lastLogin'),
         '🎮 Game Version: ' + value('releaseVersion'),
@@ -92,6 +95,10 @@ module.exports = {
       sections.push('🏰 Guild: ' + guildValue('clanName', 'guildName', 'name'));
       sections.push('🆔 Guild ID: ' + guildValue('clanId', 'guildId', 'id'));
       sections.push('📈 Guild Level: ' + guildValue('clanLevel', 'guildLevel', 'level'));
+      sections.push('👑 Guild Leader UID: ' + guildValue('captainId', 'leaderId', 'leaderUid', 'ownerId'));
+      sections.push('👥 Guild Members: ' + guildValue('memberNum', 'memberCount', 'members'));
+      sections.push('🏆 Guild Honor: ' + guildValue('honorPoint', 'honor', 'clanPoint'));
+      sections.push('📅 Guild Created: ' + guildValue('createAt', 'createdAt'));
       const pet = data.petInfo || data.PetInfo || {};
       sections.push('', '🐾 *PET INFO*');
       sections.push('🐕 Pet Name: ' + (pet.name || pet.petName || 'N/A'));
@@ -112,7 +119,7 @@ module.exports = {
         }).format(date);
       };
       sections.forEach((line, index) => {
-        if (line.startsWith('🗓️ Created: ') || line.startsWith('🕒 Last Login: ')) {
+        if (line.startsWith('🗓️ Created: ') || line.startsWith('🕒 Last Login: ') || line.startsWith('📅 Guild Created: ')) {
           const pos = line.indexOf(': ');
           sections[index] = line.slice(0, pos + 2) + formatTime(line.slice(pos + 2));
         }
