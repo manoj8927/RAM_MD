@@ -112,10 +112,24 @@ module.exports = {
       pending.set(id, {files, at:Date.now()});
       for (const [key, item] of pending) if(Date.now()-item.at>10*60*1000) pending.delete(key);
       const summary = files.map(f => f.name + ' (' + Math.ceil(Buffer.byteLength(f.code)/1024) + ' KB)').join(', ');
-      return reply('📦 Plugin downloaded: ' + summary +
-        '\n⚠️ Remote JavaScript runs with bot permissions and may access credentials. Review the Gist before approving.' +
-        '\nTo install, send: ' + p + 'plugin approve ' + id +
-        '\nApproval expires in 10 minutes. No hosting setting needed.');
+      return reply([
+        '╭━━━〔 📦 RAM-MD PLUGIN 〕━━━╮',
+        '┃ ✅ *Plugin Downloaded*',
+        '╰━━━━━━━━━━━━━━━━━━━━╯',
+        '',
+        '📄 *File:* ' + summary,
+        '🔐 *Status:* Waiting for owner approval',
+        '',
+        '⚠️ *Security Notice*',
+        'This plugin contains JavaScript that may access bot files and credentials.',
+        'Please review the Gist source before approving.',
+        '',
+        '📝 *Approve command:*',
+        '\`' + p + 'plugin approve ' + id + '\`',
+        '',
+        '⏳ *Valid for:* 10 minutes',
+        '✨ *RAM-MD Plugin Manager*'
+      ].join('\\n'));
     }
     return installFiles(files, reply, reloadPlugins, p);
   },
@@ -125,7 +139,7 @@ async function installFiles(files, reply, reloadPlugins, p) {
     const installed = [];
     for (const { name, code } of files) {
       const file = path.basename(name);
-      if (!/^[\\w.-]+\\.js$/.test(file)) { await reply(`Skipped ${file}: invalid file name.`); continue; }
+      if (!/^[\w.-]+\.js$/.test(file)) { await reply(`Skipped ${file}: invalid file name.`); continue; }
       if (PROTECTED.includes(file)) { await reply(`Skipped ${file}: core plugin name.`); continue; }
       if (Buffer.byteLength(code) > MAX_SIZE) { await reply(`Skipped ${file}: file too large.`); continue; }
       try { new vm.Script('(function(exports, require, module){' + code + '\n})'); }
