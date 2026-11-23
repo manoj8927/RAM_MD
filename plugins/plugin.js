@@ -8,6 +8,8 @@ const MAX_SIZE = 200 * 1024; // 200 KB
 const ALLOWED_HOSTS = ['gist.github.com', 'gist.githubusercontent.com'];
 // Remote plugin installation executes Node.js code; keep it off unless explicitly enabled.
 const REMOTE_INSTALL_ENABLED = process.env.ALLOW_REMOTE_PLUGINS === '1';
+// Owner can review and explicitly approve each downloaded Gist without changing hosting env.
+const pending = new Map();
 const TRUSTED_ADAPTERS = {
   '3703ac9d4e896bc4ddf5a1117f91fa83': 'tx.js',
 };
@@ -50,7 +52,7 @@ module.exports = {
   name: 'plugin',
   command: ['plugin'],
   category: 'Settings',
-  desc: '.plugin <gist url> | .plugin list | .plugin remove <file.js>',
+  desc: '.plugin <gist url> | .plugin approve <code> | .plugin list | .plugin remove <file.js>',
   owner: true,
   async run({ args, config, reply, reloadPlugins }) {
     const p = config.prefix;
@@ -91,7 +93,13 @@ module.exports = {
       reloadPlugins();
       return reply(`Installed compatible adapter: ${adapter}\nThe original Gist targets another bot framework; this adapter provides the same TX font-converter behavior here.`);
     }
-    if (!REMOTE_INSTALL_ENABLED) return reply('Remote plugin installation is disabled for safety. Set ALLOW_REMOTE_PLUGINS=1 only if you fully trust the source.');
+    if (sub === 'approve') {
+      const id = String(args[1] || '').trim();
+      const staged = pending.get(id);
+      if (!staged || Date.now() - staged.at > 10 * 60 * 1000) return reply('No pending plugin approval. Send .plugin <gist URL> again.');
+      pending.delete(id);
+      return installFiles(staged.files, reply, reloadPlugins, p);
+    }
     let files;
     try {
       files = await fetchFromGist(args[0]);
@@ -99,40 +107,43 @@ module.exports = {
       return reply('Error: ' + e.message);
     }
 
+    if (!REMOTE_INSTALL_ENABLED) {
+      const id = require('crypto').randomBytes(4).toString('hex');
+      pending.set(id, {files, at:Date.now()});
+      for (const [key, item] of pending) if(Date.now()-item.at>10*60*1000) pending.delete(key);
+      const summary = files.map(f => f.name + ' (' + Math.ceil(Buffer.byteLength(f.code)/1024) + ' KB)').join(', ');
+      return reply('📦 Plugin downloaded: ' + summary +
+        '\\n⚠️ Remote JavaScript runs with bot permissions and may access credentials. Review the Gist before approving.' +
+        '\\nTo install, send: ' + p + 'plugin approve ' + id +
+        '\\nApproval expires in 10 minutes. No hosting setting needed.');
+    }
+    return installFiles(files, reply, reloadPlugins, p);
+  },
+};
+
+async function installFiles(files, reply, reloadPlugins, p) {
     const installed = [];
     for (const { name, code } of files) {
       const file = path.basename(name);
-      if (!/^[\w.-]+\.js$/.test(file)) { await reply(`Skipped ${file}: invalid file name.`); continue; }
+      if (!/^[\\w.-]+\\.js$/.test(file)) { await reply(`Skipped ${file}: invalid file name.`); continue; }
       if (PROTECTED.includes(file)) { await reply(`Skipped ${file}: core plugin name.`); continue; }
       if (Buffer.byteLength(code) > MAX_SIZE) { await reply(`Skipped ${file}: file too large.`); continue; }
-
-      // Syntax check before saving
-      try {
-        new vm.Script('(function(exports, require, module){' + code + '\n})');
-      } catch (e) {
-        await reply(`Skipped ${file}: syntax error - ${e.message}`);
-        continue;
-      }
-
+      try { new vm.Script('(function(exports, require, module){' + code + '\\n})'); }
+      catch (e) { await reply(`Skipped ${file}: syntax error - ${e.message}`); continue; }
       const full = path.join(DIR, file);
       const backup = fs.existsSync(full) ? fs.readFileSync(full) : null;
       fs.writeFileSync(full, code);
-
-      // Check it loads and has the right shape
       try {
         delete require.cache[require.resolve(full)];
         const mod = require(full);
-        if (!mod.command || typeof mod.run !== 'function') {
-          throw new Error('wrong format (needs "command" and "run")');
-        }
+        if (!mod.command || typeof mod.run !== 'function') throw new Error('wrong format (needs "command" and "run")');
         installed.push(file);
       } catch (e) {
         if (backup) fs.writeFileSync(full, backup); else fs.unlinkSync(full);
         await reply(`Skipped ${file}: ${e.message}`);
       }
     }
-
     reloadPlugins();
-    if (installed.length) await reply('Installed: ' + installed.join(', ') + `\nSend ${p}menu to see it.`);
-  },
-};
+    if (installed.length) await reply('Installed: ' + installed.join(', ') + `\\nSend ${p}menu to see it.`);
+    else await reply('No compatible plugins installed. This bot requires exports with command and run.');
+}
