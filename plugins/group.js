@@ -2,9 +2,9 @@ const { jidNormalizedUser } = require('@whiskeysockets/baileys');
 
 module.exports = {
   name: 'group',
-  command: ['tagall', 'hidetag', 'kick', 'promote', 'demote', 'groupinfo'],
+  command: ['tag', 'tagall', 'hidetag', 'kick', 'promote', 'demote', 'groupinfo'],
   category: 'Group',
-  desc: 'Group tools: tagall, hidetag, kick, promote, demote, groupinfo',
+  desc: 'Group tools: tag, tagall, hidetag, kick, promote, demote, groupinfo',
   async run({ sock, msg, from, command, text, reply, isOwner }) {
     if (!from.endsWith('@g.us')) return reply('This command works in groups only.');
 
@@ -22,11 +22,11 @@ module.exports = {
       );
     }
 
-    if (!senderIsAdmin && !isOwner) return reply('Admins only.');
+    if (!['tag', 'tagall'].includes(command) && !senderIsAdmin && !isOwner) return reply('Admins only.');
 
     const ids = meta.participants.map((p) => p.id);
 
-    if (command === 'tagall') {
+    if (command === 'tag' || command === 'tagall') {
       const list = ids.map((id) => `@${id.split('@')[0]}`).join('\n');
       return sock.sendMessage(
         from,
