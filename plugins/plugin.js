@@ -113,9 +113,9 @@ module.exports = {
       for (const [key, item] of pending) if(Date.now()-item.at>10*60*1000) pending.delete(key);
       const summary = files.map(f => f.name + ' (' + Math.ceil(Buffer.byteLength(f.code)/1024) + ' KB)').join(', ');
       return reply('📦 Plugin downloaded: ' + summary +
-        '\\n⚠️ Remote JavaScript runs with bot permissions and may access credentials. Review the Gist before approving.' +
-        '\\nTo install, send: ' + p + 'plugin approve ' + id +
-        '\\nApproval expires in 10 minutes. No hosting setting needed.');
+        '\n⚠️ Remote JavaScript runs with bot permissions and may access credentials. Review the Gist before approving.' +
+        '\nTo install, send: ' + p + 'plugin approve ' + id +
+        '\nApproval expires in 10 minutes. No hosting setting needed.');
     }
     return installFiles(files, reply, reloadPlugins, p);
   },
@@ -128,7 +128,7 @@ async function installFiles(files, reply, reloadPlugins, p) {
       if (!/^[\\w.-]+\\.js$/.test(file)) { await reply(`Skipped ${file}: invalid file name.`); continue; }
       if (PROTECTED.includes(file)) { await reply(`Skipped ${file}: core plugin name.`); continue; }
       if (Buffer.byteLength(code) > MAX_SIZE) { await reply(`Skipped ${file}: file too large.`); continue; }
-      try { new vm.Script('(function(exports, require, module){' + code + '\\n})'); }
+      try { new vm.Script('(function(exports, require, module){' + code + '\n})'); }
       catch (e) { await reply(`Skipped ${file}: syntax error - ${e.message}`); continue; }
       const full = path.join(DIR, file);
       const backup = fs.existsSync(full) ? fs.readFileSync(full) : null;
@@ -156,6 +156,6 @@ async function installFiles(files, reply, reloadPlugins, p) {
       }
     }
     reloadPlugins();
-    if (installed.length) await reply('Installed: ' + installed.join(', ') + `\\nSend ${p}menu to see it.`);
+    if (installed.length) await reply('Installed: ' + installed.join(', ') + `\nSend ${p}menu to see it.`);
     else await reply('No compatible plugins installed. Supported: RAM_MD command/run or basic Levanter Module({pattern}, handler).');
 }
