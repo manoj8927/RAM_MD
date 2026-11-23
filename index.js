@@ -24,9 +24,9 @@ async function getPairingNumber() {
   try {
     for (let attempt = 0; attempt < 3; attempt++) {
       const entered = await new Promise(resolve => rl.question(
-        '\\n📱 Please enter your WhatsApp number\\nExample: 917047XXXXXX\\nEnter number: ', resolve
+        '\n📱 Please enter your WhatsApp number\nExample: 917047XXXXXX\nEnter number: ', resolve
       ));
-      const number = String(entered || '').replace(/[\\s+()-]/g, '');
+      const number = String(entered || '').replace(/[\s+()-]/g, '');
       if (/^[1-9][0-9]{7,14}$/.test(number)) return number;
       console.log('Invalid number. Enter country code and number, digits only (8-15 digits).');
     }
@@ -161,7 +161,7 @@ async function start() {
           return;
         }
         const code = await sock.requestPairingCode(phoneNumber);
-        console.log('\\n🔐 Pairing code:', code);
+        console.log('\n🔐 Pairing code:', code);
         console.log('WhatsApp > Linked devices > Link a device > Link with phone number instead.');
       } catch (e) {
         console.error('Pairing failed:', e.message);
