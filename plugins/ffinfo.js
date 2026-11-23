@@ -29,8 +29,8 @@ module.exports = {
   async run({ args, reply }) {
     const uid = String(args[0] || '').trim();
     if (!/^\d{5,15}$/.test(uid)) return reply('🎮 Usage: .ffinfo 19191758817');
-    // Public endpoint confirmed working by bot owner; optional environment override.
-    const apiUrl = process.env.FFINFO_API_URL || 'https://api2.nftoken.info/player-info';
+    // RAM-MD's Vercel proxy is the default; hosting environment can override it.
+    const apiUrl = process.env.FFINFO_API_URL || 'https://ff-info-api-iota.vercel.app/api/ffinfo';
     try {
       const url = new URL(apiUrl);
       if (url.protocol !== 'https:') return reply('⚠️ FFINFO_API_URL must use HTTPS.');
@@ -38,6 +38,7 @@ module.exports = {
       const json = await fetchJSON(url, process.env.FFINFO_API_KEY);
       if (json.success === false || json.error || json.status === 'error') return reply('❌ API error: ' + String(json.message || json.error || 'Player not found').slice(0,180));
       const data = json.data || json.player || json;
+      const isStored = json.realtime === false || json.source === 'local-records';
       const basic = data.basicInfo || data.BasicInfo || data.AccountInfo || data.accountInfo || data;
       const profile = data.profileInfo || data.AccountProfileInfo || data;
       const social = data.socialInfo || data.SocialInfo || {};
@@ -56,6 +57,7 @@ module.exports = {
       }
       const sections = [
         '🎮 *RAM-MD | FREE FIRE PLAYER INFO*',
+        isStored ? '📁 Source: Saved profile (not live)' : '🌐 Source: Live lookup',
         '',
         '👤 *PLAYER PROFILE*',
         '🆔 UID: ' + uid,
