@@ -109,7 +109,7 @@ module.exports = {
           sections[index] = line.slice(0, pos + 2) + formatTime(line.slice(pos + 2));
         }
       });
-      return reply(sections.join('\\n'));
+      return reply(sections.join('\n'));
 
     } catch (e) {
       console.error('ffinfo:', e.message);
