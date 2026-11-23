@@ -108,10 +108,8 @@ module.exports = {
           day: '2-digit',
           month: 'short',
           year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: true
-        }).format(date) + ' IST';
+
+        }).format(date);
       };
       sections.forEach((line, index) => {
         if (line.startsWith('🗓️ Created: ') || line.startsWith('🕒 Last Login: ')) {
