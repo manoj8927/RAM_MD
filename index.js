@@ -26,9 +26,21 @@ function loadPlugins() {
     const full = path.join(dir, file);
     try {
       delete require.cache[require.resolve(full)];
-      const plugin = require(full);
-      for (const cmd of [].concat(plugin.command || [])) {
-        plugins.set(cmd.toLowerCase(), plugin);
+      const adapter = require('./lib/levanter-adapter');
+      const previousModule = global.Module;
+      const startCount = adapter.registrations.length;
+      global.Module = adapter.register;
+      let plugin;
+      try { plugin = require(full); }
+      finally {
+        if (previousModule === undefined) delete global.Module;
+        else global.Module = previousModule;
+      }
+      const newModules = adapter.registrations.splice(startCount);
+      const loaded = (plugin && plugin.command && typeof plugin.run === 'function')
+        ? [plugin] : adapter.wrap(file, newModules);
+      for (const item of loaded) {
+        for (const cmd of [].concat(item.command || [])) plugins.set(String(cmd).toLowerCase(), item);
       }
       console.log('Plugin loaded:', file);
     } catch (e) {
