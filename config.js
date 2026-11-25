@@ -1,6 +1,6 @@
 module.exports = {
-  phoneNumber: '8801XXXXXXXXX', // country code + number, digits only
-  owners: ['8801XXXXXXXXX'],    // owner numbers (can use owner-only commands)
+  phoneNumber: '917047294917', // country code + number, digits only
+  owners: ['917047294917'],    // owner numbers (can use owner-only commands)
   prefix: '.',
   mode: 'public', // public = everyone; private = owner only; groups and DMs both supported
   botName: '『ＲＡＭ－ＭＤ』⚡',
