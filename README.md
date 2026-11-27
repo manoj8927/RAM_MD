@@ -814,6 +814,41 @@ RAM_MD/
 
 <a id="troubleshooting"></a>
 
+## 🔐 WhatsApp session logout recovery (OptiLink / hosted panels)
+
+If the console says `Logged out. Delete the auth folder and pair again.`, followed by `Exit code: 1` and `Out of memory: false`, **the problem is a revoked WhatsApp linked-device session, not a RAM shortage**. WhatsApp/Baileys reports this as `DisconnectReason.loggedOut` (401). An expired/revoked session cannot be repaired by retrying the same credentials: the phone must approve a **new pairing**.
+
+### Automatic safe recovery (enabled by default)
+
+Since this update, `config.js` contains:
+
+```js
+autoRecoverLoggedOut: true,
+```
+
+On the first confirmed 401 logout, RAM_MD:
+
+1. Stops the old credential writer and **renames** `auth/` into a timestamped `auth-loggedout-...` backup. No session files are deleted.
+2. Creates a fresh `auth/` folder; if `BOT_STORAGE_DIR` is in use, it keeps the existing `auth` symlink and backs up the **real target folder** on the volume.
+3. Starts a new connection and requests a fresh pairing code using `PHONE_NUMBER` or the `phoneNumber` configured for the bot.
+4. Prints the pairing code in the hosting console. On the phone, open **WhatsApp → Linked devices → Link a device → Link with phone number instead** and enter the code.
+
+**Do not share pairing codes or `auth/` backups.** A new link still needs phone-side approval. If the session logs out again immediately, RAM_MD **stops automatic recovery after one attempt per process** to avoid an endless crash/re-pair loop. Check whether another bot instance is using the same WhatsApp account, whether the hosting storage is persistent, and whether you unlinked the device.
+
+To disable automatic session backup/re-pair and recover manually, set the **hosting environment variable** `WA_AUTO_REPAIR_LOGOUT=0`, or edit `autoRecoverLoggedOut: false` in `config.js`.
+
+### Manual recovery if the server is already offline
+
+1. **Stop** the Bot in OptiLink. Do not run two copies simultaneously.
+2. Open **Files / File Manager** and find the Bot folder containing `index.js`, `config.js` and `auth/`. Rename `auth` to `auth-loggedout-backup` instead of deleting it. If `auth` is a symlink into `BOT_STORAGE_DIR`, rename/back up its **target directory**, not merely the link.
+3. Start the Bot again. The updated code will create a new `auth/` and request a new pairing code.
+4. On your phone, visit **WhatsApp → Linked devices** and pair the bot using the code shown in the console.
+5. Check `.ping`, `.alive`, and `.menu` in WhatsApp.
+
+**Important:** Keep `data/` and all AI API keys intact. A new WhatsApp pairing does not require replacing `config.js` or resetting your settings. If you cannot see a pairing code, verify the phone number in hosting startup variables, check startup logs and confirm that the server is actually running.
+
+---
+
 ## 🛠️ Troubleshooting
 
 | Problem | What to check |
