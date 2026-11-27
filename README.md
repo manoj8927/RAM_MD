@@ -356,6 +356,31 @@ Owner-only commands: `.private`, `.public`, `.mode`, `.mode private`, `.mode pub
 - Existing group-participant welcome/goodbye events and status automation are separate background features and are not disabled by private mode.
 - `.public` does not override individual owner-only command restrictions or group admin permissions.
 
+## 🧭 Interactive Menu & quick navigation
+
+RAM-MD now supports a compact photo menu with optional tap buttons, and **typed navigation** that also works when WhatsApp hides interactive buttons.
+
+| Send in WhatsApp | Result |
+| --- | --- |
+| `.menu` / `.help` | Menu picture, categories and a short system overview |
+| `.menu 1` | Open the first numbered category shown in the main menu |
+| `.menu download` | List download commands |
+| `.menu games` | List games |
+| `.menu settings` | Owner-only settings commands (visible to owner) |
+| `.menu all` | Full command reference, split into WhatsApp-sized messages |
+| `.menu search song` | Find commands by name |
+| `.settings 11 on` / `.settings 11 off` | Owner can enable/disable tap buttons |
+
+The main menu displays the **current Public/Private mode**, not a hard-coded value. The image uses a short caption when the command list is long. If the image link fails, a text menu is shown. WhatsApp quick replies are not supported on every client; **all options can be typed instead**.
+
+Configure the menu picture through the direct HTTPS URL in `config.js` (`menuImage`). A GitHub `blob/` image URL will also be converted to a raw image link. You can disable optional buttons by setting `menuButtons: false` in `config.js`, or by sending `.settings 11 off` as the bot owner; the setting is saved in `data/settings.json`.
+
+For maintainers, run the menu regression tests with:
+
+```bash
+npm test
+```
+
 ## 📚 Commands
 
 | Command | Purpose |
@@ -643,7 +668,7 @@ If the bot is already running, restart it from your hosting panel or PM2 instead
 
 ### ⚙️ Advanced WhatsApp settings panel
 
-The owner can send `.settings` to view a categorized control panel with **10 toggles**: status seen, status react, AI auto reply, video quality selection, tap buttons, connection notification, AI introduction, AI web search, AI reply to owner, and debug logs.
+The owner can send `.settings` to view a categorized control panel with **11 toggles**: status seen, status react, AI auto reply, video quality selection, tap buttons, connection notification, AI introduction, AI web search, AI reply to owner, debug logs, and optional menu tap buttons.
 
 Reply within 10 minutes with `6 off` or send `.settings 6 off` directly. Use `.settings` to see the current numbered options. The settings are owner-only. Most settings persist in `data/settings.json`; AI auto-reply uses its own existing persistence mechanism. `AI Web Search` only has an effect with a supported provider/configuration, and the connection notice setting applies to future startup notifications.
 
