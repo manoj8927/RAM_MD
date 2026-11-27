@@ -42,7 +42,7 @@ function apply(command, input) {
   if (!input) throw new Error('Please provide text after the command.');
   if (input.length>MAX_INPUT) throw new Error('Text too long (maximum '+MAX_INPUT+' characters).');
   if (command==='textstats') {
-    const words=input.match(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu)||[];
+    const words=input.match(/[\p{L}\p{M}\p{N}]+(?:['’-][\p{L}\p{M}\p{N}]+)*/gu)||[];
     const letters=input.match(/\p{L}/gu)||[];
     const digits=input.match(/\p{N}/gu)||[];
     return ['📊 *TEXT STATS*',
@@ -56,9 +56,9 @@ function apply(command, input) {
   }
   if (command==='slug') {
     return '🔗 '+input.normalize('NFKC').toLowerCase()
-      .replace(/[^\p{L}\p{N}]+/gu,'-').replace(/^-+|-+$/g,'').slice(0,250);
+      .replace(/[^\p{L}\p{M}\p{N}]+/gu,'-').replace(/^-+|-+$/g,'').slice(0,250);
   }
-  if (command==='titlecase') return limit('🔠 '+input.toLocaleLowerCase().replace(/(^|[^\p{L}])(\p{L})/gu,(_,sep,c)=>sep+c.toLocaleUpperCase()));
+  if (command==='titlecase') return limit('🔠 '+input.toLocaleLowerCase().replace(/(^|[^\p{L}\p{M}])(\p{L})/gu,(_,sep,c)=>sep+c.toLocaleUpperCase()));
   if (command==='dedupe'||command==='sortlines') {
     const lines=linesOf(input);
     if (lines.length<2) throw new Error('Provide at least two lines (or separate items with |).');
@@ -101,7 +101,7 @@ function apply(command, input) {
     return links.length?limit('🔗 *FOUND LINKS ('+links.length+')*\n'+links.map((v,i)=>(i+1)+'. '+v).join('\n')):'No HTTP/HTTPS links found.';
   }
   if (command==='wordfreq') {
-    const words=(input.toLocaleLowerCase().match(/[\p{L}\p{N}]+/gu)||[]);
+    const words=(input.toLocaleLowerCase().match(/[\p{L}\p{M}\p{N}]+/gu)||[]);
     const map=new Map();
     for(const word of words) map.set(word,(map.get(word)||0)+1);
     const top=[...map.entries()].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).slice(0,15);
