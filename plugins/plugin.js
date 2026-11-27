@@ -5,7 +5,7 @@ const vm = require('vm');
 const DIR = __dirname;
 // Built-in files shipped with RAM_MD must never be overwritten or removed via remote Gists.
 // Only additional, uniquely named user plugins may be managed with .plugin remove.
-const PROTECTED = new Set(["ram-downloader-api.js","custom.js","text-lab.js","adult-download.js","ai-creative-pack.js","ai-utility-pack.js","alive.js","areact.js","autoreply.js","bot-mode.js","calc.js","car.js","challenge-games.js","choice.js","ffinfo.js","fullpp.js","fun-extra.js","fun-pack.js","games.js","group-extras.js","group.js","hack.js","hangman.js","insta.js","jid.js","menu.js","mini-game-pack.js","more-utilities.js","movie.js","offline-social-pack.js","offline-text-tools.js","ping.js","plugin.js","reload.js","safe-prank-pack.js","settings.js","snake.js","social-download.js","sticker.js","tx.js","utility-pack.js","yt.js"]);
+const PROTECTED = new Set(["ram-downloader-api.js","custom.js","text-lab.js","math-plus.js","adult-download.js","ai-creative-pack.js","ai-utility-pack.js","alive.js","areact.js","autoreply.js","bot-mode.js","calc.js","car.js","challenge-games.js","choice.js","ffinfo.js","fullpp.js","fun-extra.js","fun-pack.js","games.js","group-extras.js","group.js","hack.js","hangman.js","insta.js","jid.js","menu.js","mini-game-pack.js","more-utilities.js","movie.js","offline-social-pack.js","offline-text-tools.js","ping.js","plugin.js","reload.js","safe-prank-pack.js","settings.js","snake.js","social-download.js","sticker.js","tx.js","utility-pack.js","yt.js"]);
 const MAX_SIZE = 200 * 1024; // 200 KB
 const MAX_FILES = 10;
 const FETCH_TIMEOUT = 20000;
