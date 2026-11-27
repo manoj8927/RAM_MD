@@ -26,6 +26,9 @@ module.exports = {
   newsletterJid: '120363413703815929@newsletter',
   newsletterName: 'ＲＡＭ－ＭＤ',
 
+  // On a confirmed WhatsApp 401 logout, preserve auth/ as a backup and request fresh pairing.
+  // Set false (or WA_AUTO_REPAIR_LOGOUT=0) to require a manual session reset.
+  autoRecoverLoggedOut: true,
   autoStatusView: true,
   autoStatusReact: true,
   emojis: ['❤️', '🔥', '😂', '👍', '😍', '🙌'],
