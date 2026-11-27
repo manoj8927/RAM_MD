@@ -211,7 +211,7 @@ The bot searches for a matching movie and sends the poster with details. It only
 **Public API endpoint:** [api.smp-tech.eu.cc](https://api.smp-tech.eu.cc) · **Integration status:** Merged into [`main`](https://github.com/manoj8927/RAM_MD/tree/main) in [PR #1](https://github.com/manoj8927/RAM_MD/pull/1).
 
 > [!NOTE]
-> The API plugin is included in **`main`**, but still requires a private API key on the bot hosting platform. The standard download commands remain separate and unchanged.
+> The API plugin is included in **`main`**. It now supports **public API endpoints without a key** as well as **private endpoints with a key**. Whether a key is required is determined by the API server. The standard download commands remain separate and unchanged.
 
 After deploying the latest `main` branch, the new commands are:
 
@@ -221,15 +221,21 @@ After deploying the latest `main` branch, the new commands are:
 .ramdl https://www.instagram.com/reel/...
 ```
 
-Set these variables **on the WhatsApp bot host**, not in GitHub source:
+Set these variables **on the WhatsApp bot host**, not in GitHub source. **Only add the key when the API server enforces authentication**:
 
 ```dotenv
 RAM_DOWNLOADER_API_URL=https://api.smp-tech.eu.cc
-RAM_DOWNLOADER_API_KEY=YOUR_PRIVATE_ALTARE_API_KEY
 RAM_DOWNLOADER_MAX_HEIGHT=720
+# Optional — private API servers only:
+# RAM_DOWNLOADER_API_KEY=YOUR_PRIVATE_API_KEY
 ```
 
-The private bot key must match the `API_KEY` on the separate API server. The API currently returns **metadata and temporary media format URLs**, not guaranteed ready-to-send video files. Some services return separate audio/video streams, require cookies or block cloud IPs; `.ramdl` is not a guaranteed downloader. See [PR #1](https://github.com/manoj8927/RAM_MD/pull/1) for implementation details and testing status.
+- **Public API:** `.ramdl` now attempts the extraction even when `RAM_DOWNLOADER_API_KEY` is absent. The API must support public `/api/youtube`, `/api/instagram`, etc.
+- **Private API:** configure the same secret in your API server's `API_KEY` and in the bot host's `RAM_DOWNLOADER_API_KEY` variable. Do not publish either secret.
+- **HTTP 401/403:** if unkeyed, the API requires a key; if keyed, verify the secrets match. HTTP 404 indicates a missing download route; HTTP 503 means the API is unavailable.
+- **Test:** redeploy or `git pull origin main`, restart the bot, then send `.ramapi` and `.ramdl https://www.youtube.com/shorts/...` in WhatsApp.
+
+ The API currently returns **metadata and temporary media format URLs**, not guaranteed ready-to-send video files. Some services return separate audio/video streams, require cookies or block cloud IPs; `.ramdl` is not a guaranteed downloader. See [PR #1](https://github.com/manoj8927/RAM_MD/pull/1) for implementation details and testing status.
 
 ## 🚀 Deployment
 
