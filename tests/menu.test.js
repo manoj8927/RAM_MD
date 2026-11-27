@@ -77,6 +77,7 @@ test('image captions are short, while full overview remains accessible', async (
 test('all-commands view fits WhatsApp-sized messages', async () => {
   const ctx = fixture();
   ctx.args = ['all'];
+  ctx.plugins = makePlugins(500);
   await menu.run(ctx);
   assert.ok(ctx.calls.length > 1);
   assert.ok(ctx.calls.every(c => c.text.length < 3400));
