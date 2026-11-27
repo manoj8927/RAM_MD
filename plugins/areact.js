@@ -39,10 +39,10 @@ function status() {
 
 module.exports = {
   name: 'areact',
-  command: ['areact', 'autoreact'],
+  command: ['areact'],
   menu: ['areact'],
   category: 'Settings',
-  desc: '.areact on/off | only_pm | only_group | react_only | not_react',
+  desc: '.areact controls incoming-message reactions; .autoreact controls status reactions in Settings',
   hookPriority: -90,
   owner: true,
   async onMessage({ sock, msg, from, config }) {
