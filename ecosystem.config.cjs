@@ -1,7 +1,7 @@
 module.exports = {
   apps: [{
     name: 'status-bot',
-    script: 'index.js',
+    script: 'deploy/start.js',
     cwd: __dirname,
     interpreter: 'node',
     autorestart: true,
