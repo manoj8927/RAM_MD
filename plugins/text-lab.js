@@ -64,7 +64,7 @@ function apply(command, input) {
     if (lines.length<2) throw new Error('Provide at least two lines (or separate items with |).');
     const result=command==='sortlines'
       ? [...lines].sort((a,b)=>a.localeCompare(b,'en',{sensitivity:'base',numeric:true}))
-      : [...new Map(lines.map(v=>[v.toLocaleLowerCase(),v])).values()];
+      : lines.filter((value,index,all)=>all.findIndex(item=>item.toLocaleLowerCase()===value.toLocaleLowerCase())===index);
     return limit((command==='dedupe'?'🧹 *DUPLICATES REMOVED*':'🔤 *SORTED LINES*')+
       '\n'+result.join('\n')+'\n\nTotal: '+result.length);
   }
