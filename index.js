@@ -8,6 +8,7 @@ const {
 const pino = require('pino');
 const fs = require('fs');
 const path = require('path');
+const { backupLoggedOutAuth } = require('./lib/session-recovery');
 const config = require('./config');
 require('./lib/store').applySaved(config); // settings changed from WhatsApp survive a restart
 
@@ -40,6 +41,9 @@ let starting = false;
 let reconnectTimer = null;
 let reconnectDelay = 5000;
 let connectionNoticeSent = false;
+let loggedOutRecoveryCount = 0;
+const AUTH_DIR = path.join(__dirname, 'auth');
+const MAX_LOGOUT_RECOVERIES = 1;
 
 // ---------- Plugin loader ----------
 function loadPlugins() {
@@ -139,7 +143,7 @@ async function start() {
   if (starting) return;
   starting = true;
   loadPlugins();
-  const { state, saveCreds } = await useMultiFileAuthState('auth');
+  const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
   const { version } = await fetchLatestBaileysVersion();
 
   const sock = makeWASocket({
@@ -151,9 +155,11 @@ async function start() {
   });
 
   starting = false;
+  let pairingTimer = null;
   if (!sock.authState.creds.registered) {
     // Give the socket time to initialize, then ask for the number if missing.
-    setTimeout(async () => {
+    pairingTimer = setTimeout(async () => {
+      pairingTimer = null;
       try {
         const phoneNumber = await getPairingNumber();
         if (!phoneNumber) {
@@ -221,8 +227,49 @@ async function start() {
     if (connection === 'close') {
       const code = lastDisconnect?.error?.output?.statusCode;
       if (code === DisconnectReason.loggedOut) {
-        console.log('Logged out. Delete the auth folder and pair again.');
-        process.exit(1);
+        if (pairingTimer) {
+          clearTimeout(pairingTimer);
+          pairingTimer = null;
+        }
+        // 401 means the stored WhatsApp link has been revoked. Retrying the
+        // SAME credentials will not reconnect; back them up before re-pairing.
+        console.error('[WhatsApp] Session logged out (401): the old link cannot reconnect.');
+        const override = String(process.env.WA_AUTO_REPAIR_LOGOUT || '').trim().toLowerCase();
+        const autoRepair = override === ''
+          ? config.autoRecoverLoggedOut !== false
+          : ['1', 'true', 'yes', 'on'].includes(override);
+        if (!autoRepair || loggedOutRecoveryCount >= MAX_LOGOUT_RECOVERIES) {
+          console.error('[WhatsApp] Automatic recovery disabled or already attempted.');
+          console.error('[WhatsApp] STOP the bot, back up the auth/ folder and rename it, then start to get a new pairing code.');
+          console.error('[WhatsApp] Docs: README.md → WhatsApp session logout recovery.');
+          process.exitCode = 0; // do not trigger restart storms on revoked sessions
+          return;
+        }
+        loggedOutRecoveryCount++;
+        try {
+          // The old socket must not write stale credentials into the new folder.
+          sock.ev.removeAllListeners?.('creds.update');
+          const result = backupLoggedOutAuth(AUTH_DIR);
+          if (result.backedUp) {
+            console.log('[WhatsApp] Logged-out session safely backed up to:', result.backupPath);
+          } else {
+            console.log('[WhatsApp] No existing auth folder; created a fresh one.');
+          }
+          connectionNoticeSent = false;
+          console.log('[WhatsApp] Creating a fresh connection to request a new pairing code.');
+          setTimeout(() => {
+            start().catch(error => {
+              console.error('[WhatsApp] Pairing restart failed:', error.message);
+              console.error('[WhatsApp] Inspect storage permissions and restart the server.');
+              process.exitCode = 1;
+            });
+          }, 1000);
+        } catch (error) {
+          console.error('[WhatsApp] Auth backup failed; original session was not intentionally deleted:', error.message);
+          console.error('[WhatsApp] STOP the bot and back up auth/ manually using the hosting File Manager.');
+          process.exitCode = 1;
+        }
+        return;
       }
       if (!reconnectTimer) {
         const wait = reconnectDelay;
@@ -338,4 +385,7 @@ async function start() {
   });
 }
 
-start();
+start().catch(error => {
+  console.error('[RAM-MD] Startup failed:', error.message);
+  process.exitCode = 1;
+});
