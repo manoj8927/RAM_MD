@@ -381,6 +381,62 @@ For maintainers, run the menu regression tests with:
 npm test
 ```
 
+## 🎨 New customization panel & text utilities
+
+**Owner-only customizable settings:** `.settings` now has 14 toggles in categories. The original 1–11 numbers stay the same; three new toggles are added:
+
+| Setting | Owner command | Purpose |
+| --- | --- | --- |
+| 12. Menu Picture | `.settings 12 off` | Use a text-only menu |
+| 13. Alive Picture | `.settings 13 off` | Send text status rather than an image |
+| 14. Menu Uptime | `.settings 14 off` | Hide uptime in menu |
+| Categories | `.settings menu`, `.settings ai`, `.settings media`, `.settings status`, `.settings system` | View smaller panels |
+
+The first `.settings` reply also attempts three quick buttons (Menu / AI / Media) when `menuButtons` is enabled. WhatsApp may hide interactive buttons; all typed commands still work. After opening settings, send `12 on` or `12 off` within 10 minutes, or use the full command at any time.
+
+**Personalize RAM-MD without editing JavaScript:**
+
+```text
+.custom
+.custom botname RAM-MD PRO
+.custom ownername SANJOY MAHATO
+.custom prefix !
+.custom style compact
+.custom footer Powered by RAM-MD
+.custom menuimage https://example.com/menu.jpg
+.custom aliveimage https://example.com/alive.jpg
+.custom alivecaption RAM-MD is Online
+.custom website https://example.com
+.custom support https://t.me/yourchannel
+.custom ytquality 720
+.custom videocfr 22
+.custom language bn
+.custom reset footer
+```
+
+Changes persist in `data/settings.json` when storage is writable. `custom style` accepts `classic` or `compact`. `ytquality` accepts 360, 480, 720, 1080 or 1440; `videocfr` is 18–28 (lower is higher quality). For images, use a **public HTTPS URL**. To revert the image URLs or other options, use `.custom reset <field>`. After changing the prefix, **all commands use the new prefix** immediately (for example, `!menu`, `!custom`).
+
+**14 extra offline text tools** (no API key required):
+
+| Command | Example |
+| --- | --- |
+| `.textstats` | `.textstats Hello World` — characters, words, UTF-8 bytes |
+| `.slug` | `.slug My New Post` — clean Unicode-friendly URL slug |
+| `.titlecase` | `.titlecase hello world` |
+| `.dedupe` | `.dedupe apple | apple | mango` |
+| `.sortlines` | `.sortlines Zebra | apple | mango` |
+| `.rot13` | `.rot13 Hello World` |
+| `.hexencode` | `.hexencode Hello` |
+| `.hexdecode` | `.hexdecode 48656c6c6f` |
+| `.morse` | `.morse HELLO 123` |
+| `.demorse` | `.demorse .... . .-.. .-.. ---` |
+| `.extractlinks` | `.extractlinks https://example.com` |
+| `.wordfreq` | `.wordfreq hello hello world` |
+| `.randomcolor` | `.randomcolor` |
+| `.caseflip` | `.caseflip Hello World` |
+
+To test new commands and settings: `npm test`. Private credentials must never be pasted into WhatsApp commands or committed to the repository.
+
 ## 📚 Commands
 
 | Command | Purpose |
@@ -668,7 +724,7 @@ If the bot is already running, restart it from your hosting panel or PM2 instead
 
 ### ⚙️ Advanced WhatsApp settings panel
 
-The owner can send `.settings` to view a categorized control panel with **11 toggles**: status seen, status react, AI auto reply, video quality selection, tap buttons, connection notification, AI introduction, AI web search, AI reply to owner, debug logs, and optional menu tap buttons.
+The owner can send `.settings` to view a categorized control panel with **11 toggles**: status seen, status react, AI auto reply, video quality selection, tap buttons, connection notification, AI introduction, AI web search, AI reply to owner, debug logs, menu tap buttons, menu picture, alive picture, and optional menu uptime.
 
 Reply within 10 minutes with `6 off` or send `.settings 6 off` directly. Use `.settings` to see the current numbered options. The settings are owner-only. Most settings persist in `data/settings.json`; AI auto-reply uses its own existing persistence mechanism. `AI Web Search` only has an effect with a supported provider/configuration, and the connection notice setting applies to future startup notifications.
 

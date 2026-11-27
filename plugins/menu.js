@@ -83,12 +83,19 @@ function overview(groups, config) {
   const name = clean(config.botName || 'RAM-MD');
   const count = groups.reduce((n, g) => n + g.commands.length, 0);
   const mode = config.mode === 'private' ? 'PRIVATE 🔒' : 'PUBLIC 🌍';
-  const base = [
+  const compact = config.menuStyle === 'compact';
+  const base = compact ? [
+    '⚡ *' + name + '*  |  ' + count + ' commands',
+    '👑 ' + clean(config.ownerName || 'Owner') + '  •  ' + mode,
+    ...(config.menuShowUptime === false ? [] : ['⏱️ ' + runtime(process.uptime())]),
+    '',
+    '*📂 SELECT A CATEGORY*',
+  ] : [
     '╭━━━〔 ⚡ *RAM-MD MENU* 〕━━━╮',
     '┃ 🤖 ' + name,
     '┃ 👑 ' + clean(config.ownerName || 'Owner'),
     '┃ 🧩 ' + count + ' visible commands',
-    '┃ ⏱️ ' + runtime(process.uptime()),
+    ...(config.menuShowUptime === false ? [] : ['┃ ⏱️ ' + runtime(process.uptime())]),
     '┃ 🔐 ' + mode,
     '┃ 🏷️ v' + clean(config.version || pkg.version || '1.0.0'),
     '╰━━━━━━━━━━━━━━━━━━━━╯',
@@ -101,7 +108,9 @@ function overview(groups, config) {
   base.push('', '📌 *' + prefix + 'menu 1* · *' + prefix + 'menu download*',
     '📚 *' + prefix + 'menu all* · 🔎 *' + prefix + 'menu search song*',
     '⚙️ *' + prefix + 'settings* (owner)', '',
-    '🌐 ram-md.blogspot.com  •  SANJOY X TECH');
+    '🌐 ' + clean(config.websiteUrl || 'https://ram-md.blogspot.com/'),
+    '💬 ' + clean(config.supportUrl || 'https://t.me/Ramboss67'));
+  if (config.menuFooter) base.push('⚡ ' + clean(config.menuFooter));
   return base.join('\n');
 }
 
@@ -175,7 +184,7 @@ module.exports = {
     }
 
     const cover = overview(groups, config);
-    const image = rawUrl(config.menuImage);
+    const image = config.menuImageEnabled === false ? '' : rawUrl(config.menuImage);
     let coverSent = false;
     if (image) {
       try {
@@ -207,7 +216,7 @@ module.exports = {
       try {
         await sendQuickReplies(sock, from, msg, {
           caption: '⚡ *RAM-MD Quick Menu*\nTap a category or type ' + prefix + 'menu <category>.',
-          footer: 'SANJOY X TECH', buttons: choices,
+          footer: clean(config.menuFooter || 'RAM-MD'), buttons: choices,
         });
       } catch (error) {
         if (config.debug) console.log('[menu] quick buttons unavailable:', error.message);

@@ -33,6 +33,8 @@ function details(config) {
     `💾 *Memory:* ${(mem.rss / 1024 / 1024).toFixed(1)} MB RSS`,
     `🖥️ *Platform:* ${process.platform} ${process.arch}`,
     `⚙️ *CPU:* ${os.cpus().length} cores`,
+    `🌐 *Website:* ${config.websiteUrl || 'https://ram-md.blogspot.com/'}`,
+    `💬 *Support:* ${config.supportUrl || 'https://t.me/Ramboss67'}`,
   ].join('\n');
 }
 
@@ -47,18 +49,19 @@ module.exports = {
   async run({ sock, msg, from, command, config, reply }) {
     const text = details(config);
     if (command === 'runtime') return reply(text);
-    const image = rawUrl(config.aliveImage || config.menuImage || '');
+    const image = config.aliveImageEnabled === false ? '' : rawUrl(config.aliveImage || config.menuImage || '');
+    const caption = String(config.aliveCaption || 'BOT IS ALIVE').replace(/[\r\n]/g, ' ').slice(0, 180);
     if (image) {
       try {
         await sock.sendMessage(from, {
           image: { url: image },
-          caption: `✅ *BOT IS ALIVE*\n\n${text}`,
+          caption: `✅ *${caption}*\n\n${text}`,
         }, { quoted: msg });
         return;
       } catch (e) {
         if (config.debug) console.log('Alive image failed:', e.message);
       }
     }
-    return reply(`✅ *BOT IS ALIVE*\n\n${text}`);
+    return reply(`✅ *${caption}*\n\n${text}`);
   },
 };
