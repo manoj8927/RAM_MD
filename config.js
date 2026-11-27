@@ -14,7 +14,11 @@ module.exports = {
   menuImageEnabled: true, // owner can turn cover image on/off with .settings 12
   aliveImageEnabled: true, // owner can turn Alive photo on/off with .settings 13
   menuShowUptime: true, // show process uptime on the main menu (.settings 14)
-  menuStyle: 'classic', // classic or compact (.custom style)
+  menuShowWebsite: true, // menu setting #15: show website link
+  menuShowSupport: true, // menu setting #16: show Telegram support link
+  menuShowFooter: true, // menu setting #17: show custom footer
+  aliveShowSystemStats: true, // alive setting #18: show Node/CPU/memory details
+  menuStyle: 'classic', // classic, compact, neon or minimal (.custom style)
   menuFooter: 'SANJOY X TECH', // .custom footer
   aliveCaption: 'RAM-MD is ready!', // .custom alivecaption
   supportUrl: 'https://t.me/Ramboss67', // .custom support

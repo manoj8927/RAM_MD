@@ -20,6 +20,10 @@ const ITEMS = [
   { label: '🖼️ Menu Picture', group: 'menu', get: c => c.menuImageEnabled !== false, set: (c,v) => store.set(c,'menuImageEnabled',v) },
   { label: '🖼️ Alive Picture', group: 'menu', get: c => c.aliveImageEnabled !== false, set: (c,v) => store.set(c,'aliveImageEnabled',v) },
   { label: '⏱️ Menu Uptime', group: 'menu', get: c => c.menuShowUptime !== false, set: (c,v) => store.set(c,'menuShowUptime',v) },
+  { label: '🌐 Menu Website', group: 'menu', get: c => c.menuShowWebsite !== false, set: (c,v) => store.set(c,'menuShowWebsite',v) },
+  { label: '💬 Menu Support', group: 'menu', get: c => c.menuShowSupport !== false, set: (c,v) => store.set(c,'menuShowSupport',v) },
+  { label: '✍️ Menu Footer', group: 'menu', get: c => c.menuShowFooter !== false, set: (c,v) => store.set(c,'menuShowFooter',v) },
+  { label: '🖥️ Alive System Stats', group: 'system', get: c => c.aliveShowSystemStats !== false, set: (c,v) => store.set(c,'aliveShowSystemStats',v) },
 ];
 const GROUPS = [
   ['status','📡 STATUS AUTOMATION'],

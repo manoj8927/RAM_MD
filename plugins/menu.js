@@ -83,34 +83,46 @@ function overview(groups, config) {
   const name = clean(config.botName || 'RAM-MD');
   const count = groups.reduce((n, g) => n + g.commands.length, 0);
   const mode = config.mode === 'private' ? 'PRIVATE 🔒' : 'PUBLIC 🌍';
-  const compact = config.menuStyle === 'compact';
-  const base = compact ? [
+  const style = config.menuStyle || 'classic';
+  const up = config.menuShowUptime !== false;
+  const base = style === 'compact' ? [
     '⚡ *' + name + '*  |  ' + count + ' commands',
     '👑 ' + clean(config.ownerName || 'Owner') + '  •  ' + mode,
-    ...(config.menuShowUptime === false ? [] : ['⏱️ ' + runtime(process.uptime())]),
-    '',
-    '*📂 SELECT A CATEGORY*',
+    ...(up ? ['⏱️ ' + runtime(process.uptime())] : []),
+    '', '*📂 SELECT A CATEGORY*'
+  ] : style === 'neon' ? [
+    '✦━━━『 ⚡ *RAM-MD NEON* 』━━━✦',
+    '⚡ *' + name + '*',
+    '👑 ' + clean(config.ownerName || 'Owner'),
+    '🔐 ' + mode + '  •  🧩 ' + count + ' commands',
+    ...(up ? ['⏱️ ' + runtime(process.uptime())] : []),
+    '✧━━━━━━━━━━━━━━━━━━━━✧',
+    '', '*✨ COMMAND ZONES ✨*'
+  ] : style === 'minimal' ? [
+    '🤖 *' + name + '*',
+    'Commands: ' + count + ' · ' + mode,
+    ...(up ? ['Uptime: ' + runtime(process.uptime())] : []),
+    '', '*Categories:*'
   ] : [
     '╭━━━〔 ⚡ *RAM-MD MENU* 〕━━━╮',
     '┃ 🤖 ' + name,
     '┃ 👑 ' + clean(config.ownerName || 'Owner'),
     '┃ 🧩 ' + count + ' visible commands',
-    ...(config.menuShowUptime === false ? [] : ['┃ ⏱️ ' + runtime(process.uptime())]),
+    ...(up ? ['┃ ⏱️ ' + runtime(process.uptime())] : []),
     '┃ 🔐 ' + mode,
     '┃ 🏷️ v' + clean(config.version || pkg.version || '1.0.0'),
     '╰━━━━━━━━━━━━━━━━━━━━╯',
-    '',
-    '*📂 SELECT A CATEGORY*',
+    '', '*📂 SELECT A CATEGORY*'
   ];
   for (const [i, g] of groups.entries()) {
     base.push((i + 1) + '. ' + (EMOJI[g.category] || '📁') + ' *' + clean(g.category) + '* (' + g.commands.length + ')');
   }
   base.push('', '📌 *' + prefix + 'menu 1* · *' + prefix + 'menu download*',
     '📚 *' + prefix + 'menu all* · 🔎 *' + prefix + 'menu search song*',
-    '⚙️ *' + prefix + 'settings* (owner)', '',
-    '🌐 ' + clean(config.websiteUrl || 'https://ram-md.blogspot.com/'),
-    '💬 ' + clean(config.supportUrl || 'https://t.me/Ramboss67'));
-  if (config.menuFooter) base.push('⚡ ' + clean(config.menuFooter));
+    '⚙️ *' + prefix + 'settings* (owner)', '');
+  if (config.menuShowWebsite !== false) base.push('🌐 ' + clean(config.websiteUrl || 'https://ram-md.blogspot.com/'));
+  if (config.menuShowSupport !== false) base.push('💬 ' + clean(config.supportUrl || 'https://t.me/Ramboss67'));
+  if (config.menuShowFooter !== false && config.menuFooter) base.push('⚡ ' + clean(config.menuFooter));
   return base.join('\n');
 }
 

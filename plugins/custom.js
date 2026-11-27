@@ -5,7 +5,7 @@ const FIELDS = {
   botname: { key:'botName', default:'『ＲＡＭ－ＭＤ』⚡', example:'RAM-MD PRO' },
   ownername: { key:'ownerName', default:'Sanjoy Mahato', example:'SANJOY MAHATO' },
   prefix: { key:'prefix', default:'.', example:'!' },
-  style: { key:'menuStyle', default:'classic', example:'compact' },
+  style: { key:'menuStyle', default:'classic', example:'neon' },
   footer: { key:'menuFooter', default:'SANJOY X TECH', example:'Powered by RAM-MD' },
   menuimage: { key:'menuImage', default:'https://raw.githubusercontent.com/manoj8927/IMG-url/main/manu.jpg', example:'https://example.com/menu.jpg' },
   aliveimage: { key:'aliveImage', default:'', example:'https://example.com/alive.jpg' },
@@ -34,7 +34,8 @@ function info(config) {
     p+'custom ownername My Name',
     p+'custom footer Your footer',
     p+'custom prefix !',
-    p+'custom style compact',
+    p+'custom style neon  (classic / compact / neon / minimal)',
+    p+'custom preview',
     '',
     '*🖼️ IMAGES & LINKS*',
     p+'custom menuimage https://example.com/menu.jpg',
@@ -64,11 +65,15 @@ module.exports={
   owner:true,
   desc:'.custom show | .custom botname <name> | .custom footer <text> | .custom style compact',
   info,
-  async run({args=[],config,reply,isOwner}) {
+  async run({args=[],config,reply,isOwner,plugins=[]}) {
     if (!isOwner) return reply('❌ Owner-only command.');
     const p=config.prefix||'.';
     const field=String(args[0]||'show').toLowerCase();
     if (field==='show'||field==='help'||field==='list') return reply(info(config));
+    if (field === 'preview') {
+      const { buildMenu } = require('./menu');
+      return reply('🎨 *CURRENT MENU PREVIEW*\n\n' + buildMenu(plugins, config, {isOwner:true}));
+    }
 
     if (field==='reset') {
       const name=String(args[1]||'').toLowerCase();
