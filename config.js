@@ -11,6 +11,14 @@ module.exports = {
   menuImage: 'https://raw.githubusercontent.com/manoj8927/IMG-url/main/manu.jpg',
   aliveImage: '', // blank = use menuImage; set a direct image URL for .alive
   menuButtons: true, // show optional WhatsApp quick menu buttons; typed .menu category always works
+  menuImageEnabled: true, // owner can turn cover image on/off with .settings 12
+  aliveImageEnabled: true, // owner can turn Alive photo on/off with .settings 13
+  menuShowUptime: true, // show process uptime on the main menu (.settings 14)
+  menuStyle: 'classic', // classic or compact (.custom style)
+  menuFooter: 'SANJOY X TECH', // .custom footer
+  aliveCaption: 'RAM-MD is ready!', // .custom alivecaption
+  supportUrl: 'https://t.me/Ramboss67', // .custom support
+  websiteUrl: 'https://ram-md.blogspot.com/', // .custom website
   newsletterJid: '120363413703815929@newsletter',
   newsletterName: 'ＲＡＭ－ＭＤ',
 
