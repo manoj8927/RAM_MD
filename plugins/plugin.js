@@ -3,8 +3,12 @@ const path = require('path');
 const vm = require('vm');
 
 const DIR = __dirname;
-const PROTECTED = ['menu.js', 'ping.js', 'settings.js', 'reload.js', 'sticker.js', 'group.js', 'plugin.js'];
+// Built-in files shipped with RAM_MD must never be overwritten or removed via remote Gists.
+// Only additional, uniquely named user plugins may be managed with .plugin remove.
+const PROTECTED = new Set(["adult-download.js","ai-creative-pack.js","ai-utility-pack.js","alive.js","areact.js","autoreply.js","bot-mode.js","calc.js","car.js","challenge-games.js","choice.js","ffinfo.js","fullpp.js","fun-extra.js","fun-pack.js","games.js","group-extras.js","group.js","hack.js","hangman.js","insta.js","jid.js","menu.js","mini-game-pack.js","more-utilities.js","movie.js","offline-social-pack.js","offline-text-tools.js","ping.js","plugin.js","reload.js","safe-prank-pack.js","settings.js","snake.js","social-download.js","sticker.js","tx.js","utility-pack.js","yt.js"]);
 const MAX_SIZE = 200 * 1024; // 200 KB
+const MAX_FILES = 10;
+const FETCH_TIMEOUT = 20000;
 const ALLOWED_HOSTS = ['gist.github.com', 'gist.githubusercontent.com'];
 // Remote plugin installation executes Node.js code; keep it off unless explicitly enabled.
 const REMOTE_INSTALL_ENABLED = process.env.ALLOW_REMOTE_PLUGINS === '1';
@@ -14,39 +18,65 @@ const TRUSTED_ADAPTERS = {
   '3703ac9d4e896bc4ddf5a1117f91fa83': 'tx.js',
 };
 
-// Get [{name, code}] from a gist page URL or a raw gist URL
+// Download only a bounded, supported amount of code to avoid exhausting a small VPS.
+async function fetchText(url, headers = {}) {
+  const res = await fetch(url, {
+    headers,
+    signal: AbortSignal.timeout(FETCH_TIMEOUT),
+    redirect: 'follow',
+  });
+  if (!res.ok) throw new Error('Download failed: HTTP ' + res.status);
+  if (Number(res.headers.get('content-length')) > MAX_SIZE) throw new Error('Plugin is too large.');
+  const reader = res.body?.getReader();
+  if (!reader) throw new Error('Empty plugin download response.');
+  let total = 0;
+  const chunks = [];
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > MAX_SIZE) throw new Error('Plugin exceeds 200 KB limit.');
+      chunks.push(Buffer.from(value));
+    }
+  } finally {
+    try { await reader.cancel(); } catch (_) {}
+  }
+  return Buffer.concat(chunks).toString('utf8');
+}
+
+// Only HTTPS GitHub Gists are supported, and only JavaScript files can be installed.
 async function fetchFromGist(urlStr) {
   const url = new URL(urlStr);
-  if (!ALLOWED_HOSTS.includes(url.hostname)) {
-    throw new Error('Only gist.github.com links are allowed.');
+  if (url.protocol !== 'https:' || !ALLOWED_HOSTS.includes(url.hostname)) {
+    throw new Error('Only HTTPS gist.github.com links are allowed.');
   }
 
-  // Raw link: https://gist.githubusercontent.com/user/id/raw/.../file.js
   if (url.hostname === 'gist.githubusercontent.com') {
-    const res = await fetch(url.href);
-    if (!res.ok) throw new Error('Download failed: ' + res.status);
-    return [{ name: path.basename(url.pathname), code: await res.text() }];
+    const name = path.basename(url.pathname);
+    if (!name.endsWith('.js')) throw new Error('A raw Gist URL must point to a .js file.');
+    return [{ name, code: await fetchText(url.href) }];
   }
 
-  // Gist page: use the GitHub API to list files
-  const id = url.pathname.split('/').filter(Boolean).pop();
-  const res = await fetch('https://api.github.com/gists/' + id, {
-    headers: { 'User-Agent': 'status-bot', Accept: 'application/vnd.github+json' },
-  });
-  if (!res.ok) throw new Error('Gist not found or rate limited: ' + res.status);
-  const data = await res.json();
-
-  const files = Object.values(data.files).filter((f) => f.filename.endsWith('.js'));
-  if (!files.length) throw new Error('No .js file found in this gist.');
+  const parts = url.pathname.split('/').filter(Boolean);
+  const id = parts.length >= 2 ? parts[1] : '';
+  if (!/^[a-f0-9]{16,64}$/i.test(id)) throw new Error('Invalid Gist URL.');
+  const data = JSON.parse(await fetchText('https://api.github.com/gists/' + id, GH_HEADERS));
+  const files = Object.values(data.files || {}).filter(f => f.filename?.endsWith('.js'));
+  if (!files.length) throw new Error('No .js file found in this Gist.');
+  if (files.length > MAX_FILES) throw new Error('Too many files (maximum 10).');
 
   const out = [];
-  for (const f of files) {
-    const r = await fetch(f.raw_url);
-    if (!r.ok) throw new Error('Download failed: ' + f.filename);
-    out.push({ name: f.filename, code: await r.text() });
+  for (const file of files) {
+    const u = new URL(file.raw_url);
+    if (u.protocol !== 'https:' || u.hostname !== 'gist.githubusercontent.com') {
+      throw new Error('Unexpected Gist content URL.');
+    }
+    out.push({ name: file.filename, code: await fetchText(u.href) });
   }
   return out;
 }
+const GH_HEADERS = { 'User-Agent': 'ram-md', Accept: 'application/vnd.github+json' };
 
 module.exports = {
   name: 'plugin',
@@ -60,21 +90,22 @@ module.exports = {
 
     if (!sub) {
       return reply(
-        `*Plugin manager*\n${p}plugin <gist url>: install\n${p}plugin list: installed files\n${p}plugin remove <file.js>: delete`
+        `*Plugin manager*\n${p}plugin <gist url>: preview and request approval\n${p}plugin approve <code>: approve reviewed Gist\n${p}plugin list: installed files\n${p}plugin remove <file.js>: remove user plugin only\nCore plugins cannot be overwritten or removed.`
       );
     }
 
     if (sub === 'list') {
       const files = fs.readdirSync(DIR).filter((f) => f.endsWith('.js'));
-      return reply('*Installed plugins*\n' + files.map((f) => `• ${f}${PROTECTED.includes(f) ? ' (core)' : ''}`).join('\n'));
+      return reply('*Installed plugins*\n' + files.map((f) => `• ${f}${PROTECTED.has(f) ? ' (core)' : ''}`).join('\n'));
     }
 
     if (sub === 'remove') {
       const file = path.basename(args[1] || '');
       if (!file.endsWith('.js')) return reply(`Usage: ${p}plugin remove <file.js>`);
-      if (PROTECTED.includes(file)) return reply('Core plugins cannot be removed.');
+      if (PROTECTED.has(file)) return reply('Core plugins cannot be removed.');
       const full = path.join(DIR, file);
       if (!fs.existsSync(full)) return reply('Plugin not found.');
+      if (fs.lstatSync(full).isSymbolicLink()) return reply('Symlink plugins cannot be removed.');
       fs.unlinkSync(full);
       reloadPlugins();
       return reply(`Removed ${file}`);
@@ -140,13 +171,16 @@ async function installFiles(files, reply, reloadPlugins, p) {
     for (const { name, code } of files) {
       const file = path.basename(name);
       if (!/^[\w.-]+\.js$/.test(file)) { await reply(`Skipped ${file}: invalid file name.`); continue; }
-      if (PROTECTED.includes(file)) { await reply(`Skipped ${file}: core plugin name.`); continue; }
+      if (PROTECTED.has(file)) { await reply(`Skipped ${file}: core plugin name.`); continue; }
       if (Buffer.byteLength(code) > MAX_SIZE) { await reply(`Skipped ${file}: file too large.`); continue; }
       try { new vm.Script('(function(exports, require, module){' + code + '\n})'); }
       catch (e) { await reply(`Skipped ${file}: syntax error - ${e.message}`); continue; }
       const full = path.join(DIR, file);
-      const backup = fs.existsSync(full) ? fs.readFileSync(full) : null;
-      fs.writeFileSync(full, code);
+      if (fs.existsSync(full)) {
+        await reply('Skipped ' + file + ': already exists. Review it and remove a non-core plugin explicitly before reinstalling.');
+        continue;
+      }
+      fs.writeFileSync(full, code, { flag: 'wx', mode: 0o600 });
       try {
         delete require.cache[require.resolve(full)];
         const adapter = require('../lib/levanter-adapter');
@@ -165,7 +199,7 @@ async function installFiles(files, reply, reloadPlugins, p) {
           throw new Error('No RAM_MD command/run or supported Levanter Module registration');
         installed.push(file + (compatible.length ? ' (Levanter: ' + compatible.map(x=>x.name).join(', ') + ')' : ''));
       } catch (e) {
-        if (backup) fs.writeFileSync(full, backup); else fs.unlinkSync(full);
+        fs.rmSync(full, { force: true });
         await reply(`Skipped ${file}: ${e.message}`);
       }
     }
