@@ -14,6 +14,7 @@ const ITEMS = [
   { label: '🔎 AI Web Search', get: (c) => c.aiSearch === true, set: (c, v) => store.set(c, 'aiSearch', v) },
   { label: '👑 AI Reply to Owner', get: (c) => c.aiReplyOwner === true, set: (c, v) => store.set(c, 'aiReplyOwner', v) },
   { label: '🛠️ Debug Logs', get: (c) => c.debug === true, set: (c, v) => store.set(c, 'debug', v) },
+  { label: '📱 Menu Tap Buttons', get: (c) => c.menuButtons === true, set: (c, v) => store.set(c, 'menuButtons', v) },
 ];
 
 const pending = new Map(); // chat -> { asker, expires }
@@ -39,7 +40,7 @@ function panel(config) {
     lines[3], lines[4],
     '',
     '🔧 *BOT SYSTEM*',
-    lines[5], lines[9],
+    lines[5], lines[9], lines[10],
     '',
     '━━━━━━━━━━━━━━━━━━━━',
     '✏️ *HOW TO CHANGE*',
