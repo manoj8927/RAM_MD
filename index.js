@@ -196,8 +196,8 @@ async function start() {
           '🕒 *Connected (IST):* ' + started,
           '',
           '📜 *Menu:* ' + (config.prefix || '.') + 'menu',
-          '🌐 *Website:* https://ram-md.blogspot.com/',
-          '💬 *Support:* https://t.me/Ramboss67',
+          '🌐 *Website:* ' + (config.websiteUrl || 'https://ram-md.blogspot.com/'),
+          '💬 *Support:* ' + (config.supportUrl || 'https://t.me/Ramboss67'),
           '',
           '✨ RAM-MD is ready to use!'
         ].join('\n');
