@@ -208,12 +208,12 @@ The bot searches for a matching movie and sends the poster with details. It only
 
 ## 🌐 RAM Downloader API integration
 
-**Public API endpoint:** [api.smp-tech.eu.cc](https://api.smp-tech.eu.cc) · **Integration status:** [Pull Request #1 — open for review](https://github.com/manoj8927/RAM_MD/pull/1).
+**Public API endpoint:** [api.smp-tech.eu.cc](https://api.smp-tech.eu.cc) · **Integration status:** Merged into [`main`](https://github.com/manoj8927/RAM_MD/tree/main) in [PR #1](https://github.com/manoj8927/RAM_MD/pull/1).
 
 > [!NOTE]
-> The API integration lives in a **separate pull request** and is **not included in the current `main` branch** until merged. The standard download commands in `main` continue to use the existing plugins.
+> The API plugin is included in **`main`**, but still requires a private API key on the bot hosting platform. The standard download commands remain separate and unchanged.
 
-Once the integration PR is reviewed, merged and deployed, its new commands are:
+After deploying the latest `main` branch, the new commands are:
 
 ```text
 .ramapi
@@ -919,17 +919,4 @@ RAM_MD is an independent, unofficial project; it is not affiliated with WhatsApp
 **⚡ 『ＲＡＭ－ＭＤ』 • Built for learning, automation & community**
 
 </div>
-
-
-## 📥 RAM Downloader API plugin
-
-Optional integration with your public API at **https://api.smp-tech.eu.cc**:
-
-- `.ramapi` — show API health.
-- `.ramdl <public-media-url>` — look up compatible public video/audio formats through the API.
-- Supported URL platforms: YouTube, Instagram, Facebook, TikTok, Twitter/X, Pinterest and SoundCloud.
-
-To enable it, set `RAM_DOWNLOADER_API_KEY` privately on the bot host to the same value as Altare's `API_KEY`. Optional: `RAM_DOWNLOADER_API_URL=https://api.smp-tech.eu.cc` and `RAM_DOWNLOADER_MAX_HEIGHT=720`. Restart the bot to apply new environment variables.
-
-The API returns metadata and temporary media links (not ready-made files). Some links cannot be sent because video/audio streams are separate, URLs expire, or site access is restricted. The existing downloader commands remain unchanged. See [RAM Downloader API setup and limitations](docs/RAM_DOWNLOADER_API.md).
 
