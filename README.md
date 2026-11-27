@@ -28,7 +28,7 @@
 | Get started | Features & commands | Deploy & maintain |
 | --- | --- | --- |
 | [Quick start](#-quick-start) | [Features](#-features) | [Deployment](#-deployment) |
-| [WhatsApp pairing](#-whatsapp-pairing) | [Command reference](#-commands) | [Troubleshooting](#️-troubleshooting) |
+| [WhatsApp pairing](#-whatsapp-pairing) | [Command reference](#-commands) | [Troubleshooting](#troubleshooting) |
 | [AI setup](#-ai-setup--groq-and-openai) | [Plugin packs](#-new-plugin-packs) | [Security](#-security) |
 | [TMDB movie API](#-movie-api--tmdb) | [Additional commands](#-additional-command-packs--30-commands) | [Support](#-support) |
 | [Modes](#-public--private-bot-modes) | [Downloader API (optional)](#-ram-downloader-api-integration) | [Project layout](#-project-structure) |
@@ -700,6 +700,8 @@ RAM_MD/
 ```
 
 **Private runtime files** (create only on your host): `auth/`, `data/`, `ai_key*.txt`, and any private cookies. Do not commit these.
+
+<a id="troubleshooting"></a>
 
 ## 🛠️ Troubleshooting
 
