@@ -100,8 +100,9 @@ module.exports = {
         'ramdl https://www.facebook.com/...\n\nSupported public links: YouTube, Instagram, Facebook, TikTok, Twitter/X, Pinterest, SoundCloud.');
     }
 
-    const key = process.env.RAM_DOWNLOADER_API_KEY;
-    if (!key) return reply('⚠️ RAM Downloader API key is not set on this bot host. Configure RAM_DOWNLOADER_API_KEY privately.');
+    // This API may be configured as public or private. Don't require a key
+    // locally: let the server decide, and send x-api-key only when provided.
+    const key = String(process.env.RAM_DOWNLOADER_API_KEY || '').trim();
 
     try {
       await reply('⏳ Extracting public ' + platform + ' media with RAM API...');
@@ -130,7 +131,11 @@ module.exports = {
     } catch (error) {
       // Do not log secret API keys or short-lived signed media URLs.
       console.log('[ramdl] error:', error.status || error.code || error.name);
-      if (error.status === 401) return reply('❌ Invalid RAM API key. Verify RAM_DOWNLOADER_API_KEY on the bot host.');
+      if (error.status === 401 || error.status === 403) return reply(key
+        ? '🔐 RAM API rejected the configured key (HTTP ' + error.status + '). Verify RAM_DOWNLOADER_API_KEY on this bot host matches API_KEY on the API server.'
+        : '🔐 RAM API requires a private key (HTTP ' + error.status + '). Set RAM_DOWNLOADER_API_KEY securely on this bot host to match API_KEY on your API server.');
+      if (error.status === 404) return reply('❌ RAM API download endpoint was not found (HTTP 404). Check RAM_DOWNLOADER_API_URL and the API /api/' + platform + ' route.');
+      if (error.status === 503) return reply('❌ RAM API service is temporarily unavailable (HTTP 503). Verify the API server is running.');
       if (error.status === 429) return reply('❌ API busy or rate-limited. Try later.');
       if (error.status === 502) return reply('❌ The source could not be extracted by the RAM API (HTTP 502).');
       return reply('❌ RAM Downloader failed. The link may have expired or require media headers. Existing download commands remain available.');
