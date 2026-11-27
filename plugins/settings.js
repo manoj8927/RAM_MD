@@ -3,6 +3,7 @@
 const store = require('../lib/store');
 const { senderOf } = require('../lib/choice');
 const autoreply = require('./autoreply');
+const { sendQuickReplies } = require('../lib/buttons');
 
 const ITEMS = [
   { label: '👁️ Status Seen', group: 'status', get: c => c.autoStatusView !== false, set: (c,v) => store.set(c,'autoStatusView',v) },
@@ -91,7 +92,7 @@ module.exports = {
     pending.set(from,{asker:senderOf(msg),expires:Date.now()+ttl});
     return true;
   },
-  async run({command,args=[],msg,from,config,reply}) {
+  async run({command,args=[],msg,from,config,reply,sock}) {
     const prefix=config.prefix||'.';
     if (command==='settings'||command==='setting') {
       const input=args.join(' ').trim().toLowerCase();
@@ -104,7 +105,23 @@ module.exports = {
         return reply('Usage: '+prefix+'settings [menu|status|ai|media|system]\n'+prefix+'settings 12 off');
       }
       pending.set(from,{asker:senderOf(msg),expires:Date.now()+ttl});
-      return reply(panel(config,input==='help'?'all':input||'all'));
+      await reply(panel(config,input==='help'?'all':input||'all'));
+      if (!input && config.menuButtons === true && sock && typeof sock.relayMessage === 'function') {
+        try {
+          await sendQuickReplies(sock,from,msg,{
+            caption:'⚙️ *RAM-MD SETTINGS*\nChoose a section or type '+prefix+'settings menu',
+            footer:config.menuFooter||'RAM-MD',
+            buttons:[
+              {text:'🎨 MENU',id:prefix+'settings menu'},
+              {text:'🤖 AI',id:prefix+'settings ai'},
+              {text:'🎬 MEDIA',id:prefix+'settings media'},
+            ],
+          });
+        } catch(error) {
+          if(config.debug) console.log('Settings buttons unavailable:',error.message);
+        }
+      }
+      return;
     }
     const item = ITEMS[command==='autoview'?0:1];
     const value=String(args[0]||'').toLowerCase();
