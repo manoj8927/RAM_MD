@@ -181,11 +181,12 @@ async function installFiles(files, reply, reloadPlugins, p) {
         continue;
       }
       fs.writeFileSync(full, code, { flag: 'wx', mode: 0o600 });
+      let registrationStart = null;
       try {
         delete require.cache[require.resolve(full)];
         const adapter = require('../lib/levanter-adapter');
         const previousModule = global.Module;
-        const before = adapter.registrations.length;
+        registrationStart = adapter.registrations.length;
         let mod;
         try {
           global.Module = adapter.register;
@@ -194,13 +195,13 @@ async function installFiles(files, reply, reloadPlugins, p) {
           if (previousModule === undefined) delete global.Module;
           else global.Module = previousModule;
         }
-        const compatible = adapter.registrations.splice(before);
+        const compatible = adapter.registrations.splice(registrationStart);
         if ((!mod || !mod.command || typeof mod.run !== 'function') && !compatible.length)
           throw new Error('No RAM_MD command/run or supported Levanter Module registration');
         installed.push(file + (compatible.length ? ' (Levanter: ' + compatible.map(x=>x.name).join(', ') + ')' : ''));
       } catch (e) {
         // A plugin may register Levanter commands before throwing. Roll those back.
-        try { require('../lib/levanter-adapter').registrations.splice(before); } catch (_) {}
+        try { if (registrationStart !== null) require('../lib/levanter-adapter').registrations.splice(registrationStart); } catch (_) {}
         fs.rmSync(full, { force: true });
         await reply(`Skipped ${file}: ${e.message}`);
       }
