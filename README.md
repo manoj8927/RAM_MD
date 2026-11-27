@@ -383,13 +383,17 @@ npm test
 
 ## 🎨 New customization panel & text utilities
 
-**Owner-only customizable settings:** `.settings` now has 14 toggles in categories. The original 1–11 numbers stay the same; three new toggles are added:
+**Owner-only customizable settings:** `.settings` now has **18 toggles** in categories. The original 1–14 numbers remain the same; four more display options were added:
 
 | Setting | Owner command | Purpose |
 | --- | --- | --- |
 | 12. Menu Picture | `.settings 12 off` | Use a text-only menu |
 | 13. Alive Picture | `.settings 13 off` | Send text status rather than an image |
 | 14. Menu Uptime | `.settings 14 off` | Hide uptime in menu |
+| 15. Menu Website | `.settings 15 off` | Hide website link from Menu |
+| 16. Menu Support | `.settings 16 off` | Hide Telegram support from Menu |
+| 17. Menu Footer | `.settings 17 off` | Hide custom footer from Menu |
+| 18. Alive System Stats | `.settings 18 off` | Hide Node.js, CPU, memory and platform in Alive status |
 | Categories | `.settings menu`, `.settings ai`, `.settings media`, `.settings status`, `.settings system` | View smaller panels |
 
 The first `.settings` reply also attempts three quick buttons (Menu / AI / Media) when `menuButtons` is enabled. WhatsApp may hide interactive buttons; all typed commands still work. After opening settings, send `12 on` or `12 off` within 10 minutes, or use the full command at any time.
@@ -401,7 +405,8 @@ The first `.settings` reply also attempts three quick buttons (Menu / AI / Media
 .custom botname RAM-MD PRO
 .custom ownername SANJOY MAHATO
 .custom prefix !
-.custom style compact
+.custom style neon
+.custom preview
 .custom footer Powered by RAM-MD
 .custom menuimage https://example.com/menu.jpg
 .custom aliveimage https://example.com/alive.jpg
@@ -414,7 +419,7 @@ The first `.settings` reply also attempts three quick buttons (Menu / AI / Media
 .custom reset footer
 ```
 
-Changes persist in `data/settings.json` when storage is writable. `custom style` accepts `classic` or `compact`. `ytquality` accepts 360, 480, 720, 1080 or 1440; `videocfr` is 18–28 (lower is higher quality). For images, use a **public HTTPS URL**. To revert the image URLs or other options, use `.custom reset <field>`. After changing the prefix, **all commands use the new prefix** immediately (for example, `!menu`, `!custom`).
+Changes persist in `data/settings.json` when storage is writable. `custom style` accepts `classic` or `compact`. `ytquality` accepts 360, 480, 720, 1080 or 1440; `videocfr` is 18–28 (lower is higher quality). For images, use a **public HTTPS URL**. To revert the image URLs or other options, use `.custom reset <field>`. Use `.custom style classic|compact|neon|minimal` to change the text layout, and `.custom preview` to preview the current Menu without sending a picture. After changing the prefix, **all commands use the new prefix** immediately (for example, `!menu`, `!custom`).
 
 **14 extra offline text tools** (no API key required):
 
@@ -436,6 +441,31 @@ Changes persist in `data/settings.json` when storage is writable. `custom style`
 | `.caseflip` | `.caseflip Hello World` |
 
 To test new commands and settings: `npm test`. Private credentials must never be pasted into WhatsApp commands or committed to the repository.
+
+## 🧮 More useful commands — math, budgeting and word puzzles
+
+The `plugins/math-plus.js` plugin adds **14 more offline commands**. They do not need an AI API key, network access or an extra npm dependency.
+
+| Command | Usage | Result |
+| --- | --- | --- |
+| `.percent` | `.percent 15 200` | 15% of 200 = 30 |
+| `.discount` | `.discount 1500 20` | ₹1,200 payable after 20% discount |
+| `.splitbill` | `.splitbill 1200 4 10` | ₹330 each, including 10% tip |
+| `.gstcalc` | `.gstcalc 1000 18` | ₹1,180 including 18% GST added to base |
+| `.average` | `.average 2 4 6` | Average = 4 |
+| `.median` | `.median 3 50 4` | Median = 4 |
+| `.factorial` | `.factorial 10` | 3,628,800 |
+| `.prime` | `.prime 97` | Prime number check |
+| `.roman` | `.roman 2026` | MMXXVI |
+| `.deroman` | `.deroman MMXXVI` | 2026 |
+| `.palindrome` | `.palindrome Never odd or even` | Palindrome check |
+| `.anagram` | `.anagram listen \| silent` | Anagram check |
+| `.agecalc` | `.agecalc 2000-01-15` | Age as of current UTC date |
+| `.daysbetween` | `.daysbetween 2024-02-28 2024-03-01` | 2 days |
+
+**Valid ranges:** factorial 0–100, prime up to 1,000,000,000, Roman numerals 1–3,999, date input `YYYY-MM-DD`. `.gstcalc` only calculates a provided GST percentage on top of the base amount; it does not determine applicable tax rates. All cost results are illustrative arithmetic.
+
+**More owner display controls:** `.settings 15 off`, `.settings 16 off`, `.settings 17 off`, `.settings 18 off`. Restore with `on`. Existing setting numbers remain unchanged.
 
 ## 📚 Commands
 
