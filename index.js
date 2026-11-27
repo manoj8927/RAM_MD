@@ -156,6 +156,7 @@ async function start() {
 
   starting = false;
   let pairingTimer = null;
+  let disconnectHandled = false;
   if (!sock.authState.creds.registered) {
     // Give the socket time to initialize, then ask for the number if missing.
     pairingTimer = setTimeout(async () => {
@@ -225,6 +226,12 @@ async function start() {
       }
     }
     if (connection === 'close') {
+      if (disconnectHandled) return; // a socket can report a close more than once
+      disconnectHandled = true;
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+      }
       const code = lastDisconnect?.error?.output?.statusCode;
       if (code === DisconnectReason.loggedOut) {
         if (pairingTimer) {
@@ -275,7 +282,13 @@ async function start() {
         const wait = reconnectDelay;
         reconnectDelay = Math.min(reconnectDelay * 2, 120000);
         console.log('Connection closed; reconnecting in', wait, 'ms');
-        reconnectTimer = setTimeout(() => { reconnectTimer = null; start(); }, wait);
+        reconnectTimer = setTimeout(() => {
+          reconnectTimer = null;
+          start().catch(error => {
+            console.error('[WhatsApp] Reconnect failed:', error.message);
+            process.exitCode = 1;
+          });
+        }, wait);
       }
     }
   });
