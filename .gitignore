@@ -6,3 +6,6 @@ bin/
 ai_key*.txt
 cookies*.txt
 *.log
+# Retain revoked WhatsApp credentials locally, never commit them
+auth*-loggedout-*/
+auth-loggedout-*/
