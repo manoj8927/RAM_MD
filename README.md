@@ -1,47 +1,53 @@
-### 🔐 Public / Private bot mode
-
-Owner-only commands: `.private`, `.public`, `.mode`, `.mode private`, `.mode public`.
-
-- **Public** (default): everyone can use non-owner commands in private chats and groups.
-- **Private**: only the owner can use bot commands and ordinary-message hooks (including AI auto-replies) in private chats or groups.
-- The mode is stored in `data/settings.json` and survives restart when the data directory is persistent.
-- Owner numbers must be correctly set in `config.js` (`owners`); otherwise use the paired bot's own account to recover access.
-- Existing group-participant welcome/goodbye events and status automation are separate background features and are not disabled by private mode.
-- `.public` does not override individual owner-only command restrictions or group admin permissions.
-
 <div align="center">
 
-# ⚡ 『ＲＡＭ－ＭＤ』 — WhatsApp Bot
+# ⚡ 『ＲＡＭ－ＭＤ』
 
-**Automation • AI Chat • Media Tools • Group Management • Games**
+### WhatsApp Automation • AI Assistant • Media Downloader • Group Management
 
-A Node.js WhatsApp bot powered by Baileys, with owner controls, AI fallback, status automation and deployment options.
+**A modular Node.js WhatsApp bot built with Baileys, designed for extensibility and practical deployment.**
 
-[![Website](https://img.shields.io/badge/Website-RAM__MD-14b8a6?style=for-the-badge)](https://ram-md.blogspot.com/)
-[![Telegram](https://img.shields.io/badge/Telegram-Support-229ED9?style=for-the-badge)](https://t.me/Ramboss67)
-[![Stars](https://img.shields.io/github/stars/manoj8927/RAM_MD?style=for-the-badge)](https://github.com/manoj8927/RAM_MD/stargazers)
+[![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Baileys](https://img.shields.io/badge/Powered%20by-Baileys-25D366?logo=whatsapp&logoColor=white)](https://github.com/WhiskeySockets/Baileys)
+[![GitHub stars](https://img.shields.io/github/stars/manoj8927/RAM_MD?style=flat&logo=github)](https://github.com/manoj8927/RAM_MD/stargazers)
+[![GitHub issues](https://img.shields.io/github/issues/manoj8927/RAM_MD?logo=github)](https://github.com/manoj8927/RAM_MD/issues)
+[![Last commit](https://img.shields.io/github/last-commit/manoj8927/RAM_MD?logo=github)](https://github.com/manoj8927/RAM_MD/commits/main)
 
-[🌐 Website](https://ram-md.blogspot.com/) · [📦 Plugins](https://github.com/manoj8927/RAM_MD/tree/main/plugins) · [⬇️ Download ZIP](https://github.com/manoj8927/RAM_MD/archive/refs/heads/main.zip) · [🐛 Issues](https://github.com/manoj8927/RAM_MD/issues)
+**[🌐 Website](https://ram-md.blogspot.com/)** · **[📦 Plugins](plugins/)** · **[🚀 Deploy](#-deployment)** · **[💬 Telegram](https://t.me/Ramboss67)** · **[⬇️ ZIP](https://github.com/manoj8927/RAM_MD/archive/refs/heads/main.zip)**
+
+**Maintained by SANJOY MAHATO**
 
 </div>
 
 ---
 
-## 📑 Contents
+> [!IMPORTANT]
+> **RAM_MD is a long-running WhatsApp bot, not a conventional website.** Pairing data (`auth/`) must be kept private and persistent. Free hosting, sleeping instances and external APIs are **not guaranteed** to be online 24/7.
 
-- [✨ Features](#-features)
-- [⚡ Quick start](#-quick-start)
-- [🤖 AI setup — Groq and OpenAI](#-ai-setup--groq-and-openai)
-- [🎬 Movie API — TMDB](#-movie-api--tmdb)
-- [🚀 Deployment](#-deployment)
-- [📱 WhatsApp pairing](#-whatsapp-pairing)
-- [📚 Commands](#-commands)
-- [🧩 New plugin packs](#-new-plugin-packs)
-- [🆕 Additional command packs](#-additional-command-packs--31-commands)
-- [📁 Project structure](#-project-structure)
-- [🛠️ Troubleshooting](#️-troubleshooting)
-- [🔒 Security](#-security)
-- [🔗 Support](#-support)
+## 🧭 Documentation
+
+| Get started | Features & commands | Deploy & maintain |
+| --- | --- | --- |
+| [Quick start](#-quick-start) | [Features](#-features) | [Deployment](#-deployment) |
+| [WhatsApp pairing](#-whatsapp-pairing) | [Command reference](#-commands) | [Troubleshooting](#️-troubleshooting) |
+| [AI setup](#-ai-setup--groq-and-openai) | [Plugin packs](#-new-plugin-packs) | [Security](#-security) |
+| [TMDB movie API](#-movie-api--tmdb) | [Additional commands](#-additional-command-packs--30-commands) | [Support](#-support) |
+| [Modes](#-public--private-bot-modes) | [Downloader API (optional)](#-ram-downloader-api-integration) | [Project layout](#-project-structure) |
+
+---
+
+## 🚀 At a glance
+
+| Capability | What RAM_MD includes |
+| --- | --- |
+| 🤖 **AI** | Provider selection, fallback and task-based AI plugins (requires a configured provider) |
+| 🎬 **Media** | YouTube, Instagram, Facebook, TikTok and sticker utilities (platform access varies) |
+| 👥 **Groups** | Tags, welcome/goodbye, anti-link, polls and warnings, subject to permissions |
+| 🎮 **Games** | Quizzes, challenges, mini-games and text-based entertainment |
+| ⚙️ **Owner tools** | Public/private mode, status automation, settings and plugin reloading |
+| ☁️ **Deployment** | Railway, Render, Replit, Pterodactyl/Node panels and VPS (plan requirements apply) |
+
+> [!NOTE]
+> Commands shown below describe repository implementations; features requiring internet services, media tools, provider credentials or WhatsApp permissions may fail on unsupported hosting environments. Send `.menu` in WhatsApp for the currently loaded commands.
 
 ## ✨ Features
 
@@ -95,6 +101,21 @@ The default in `config.js` is now `aiReplyLanguage: 'same'`. The AI is instructe
 Examples: `তুমি কেমন আছো?` → Bengali script; `Tumi kemon acho?` → Banglish; `How are you?` → English; `आप कैसे हैं?` → Hindi. For mixed or very short messages, language detection can be uncertain; the AI uses context. Explicit requests to switch languages take precedence.
 
 The previous fixed English greeting shortcuts are bypassed in `same` mode so they cannot force English responses to Bengali/Banglish messages. This is **prompt-guided language matching**, not a translation API or a guarantee that every AI provider always follows the instruction. An existing custom `aiPrompt` overrides the default prompt; update that custom prompt too if needed. Requires a configured AI provider/key and restart after pulling changes.
+
+## 🔑 Configuration reference
+
+| Setting | Where to configure | Purpose |
+| --- | --- | --- |
+| `PHONE_NUMBER` | Hosting environment (or `config.js` `phoneNumber`) | Pairing number with country code, digits only |
+| `owners` | `config.js` | Owner-only commands and admin access |
+| `BOT_STORAGE_DIR` | Hosting environment | Persistent directory for `auth/` and `data/`, used by `deploy/start.js` |
+| `AI_KEY_GROQ` / `AI_KEY_OPENAI` | Private hosting environment | AI features and provider fallback |
+| `TMDB_API_KEY` | Private hosting environment | `.movie` / `.film` metadata lookup |
+| `FF_COMMUNITY_API_KEY` | Private hosting environment (optional) | Additional Free Fire community lookup |
+| `OCR_SPACE_API_KEY` | Private hosting environment (optional) | `.ocr` image text recognition |
+
+> [!WARNING]
+> Never commit keys, WhatsApp pairing codes, `auth/` files or browser cookies. The project deliberately ignores common private runtime files in `.gitignore`.
 
 ## 🤖 AI setup — Groq and OpenAI
 
@@ -184,6 +205,31 @@ TMDB_API_KEY=YOUR_TMDB_API_READ_ACCESS_TOKEN
 The bot searches for a matching movie and sends the poster with details. It only provides **movie information**, not a movie download or streaming link. Results depend on TMDB's catalog and the selected title.
 
 **Troubleshooting:** If the bot says `Movie lookup is not configured yet`, check the `TMDB_API_KEY` variable and restart. If it reports invalid credentials, use the **API Read Access Token**. For missing titles, try a more precise movie name. Keep tokens private; never commit them to GitHub.
+
+## 🌐 RAM Downloader API integration
+
+**Public API endpoint:** [api.smp-tech.eu.cc](https://api.smp-tech.eu.cc) · **Integration status:** [Pull Request #1 — open for review](https://github.com/manoj8927/RAM_MD/pull/1).
+
+> [!NOTE]
+> The API integration lives in a **separate pull request** and is **not included in the current `main` branch** until merged. The standard download commands in `main` continue to use the existing plugins.
+
+Once the integration PR is reviewed, merged and deployed, its new commands are:
+
+```text
+.ramapi
+.ramdl https://www.facebook.com/...
+.ramdl https://www.instagram.com/reel/...
+```
+
+Set these variables **on the WhatsApp bot host**, not in GitHub source:
+
+```dotenv
+RAM_DOWNLOADER_API_URL=https://api.smp-tech.eu.cc
+RAM_DOWNLOADER_API_KEY=YOUR_PRIVATE_ALTARE_API_KEY
+RAM_DOWNLOADER_MAX_HEIGHT=720
+```
+
+The private bot key must match the `API_KEY` on the separate API server. The API currently returns **metadata and temporary media format URLs**, not guaranteed ready-to-send video files. Some services return separate audio/video streams, require cookies or block cloud IPs; `.ramdl` is not a guaranteed downloader. See [PR #1](https://github.com/manoj8927/RAM_MD/pull/1) for implementation details and testing status.
 
 ## 🚀 Deployment
 
@@ -277,7 +323,7 @@ pm2 save
 pm2 logs status-bot
 ```
 
-To enable boot startup, run `pm2 startup` and follow its printed instructions. The PM2 config starts `index.js` directly; keep its working directory on persistent disk.
+To enable boot startup, run `pm2 startup` and follow its printed instructions. The PM2 config starts `index.js` directly; keep its working directory on persistent disk. **Note:** this PM2 entry bypasses the `deploy/start.js` bootstrap, so setting `BOT_STORAGE_DIR` alone does not create session symlinks when using `ecosystem.config.cjs`. Keep `auth/` and `data/` persistent yourself (or adapt the PM2 entry to run the bootstrap), and do not start a duplicate WhatsApp session.
 
 **Updating the bot:**
 
@@ -298,6 +344,17 @@ Back up your private keys, `auth/` and `data/` before updates. Never run two bot
 5. Wait for a `Connected as` log message.
 
 The bot uses the number configured in `config.js`. Keep `auth/` private and persistent. Do not share pairing codes or session files.
+
+## 🔐 Public & Private bot modes
+
+Owner-only commands: `.private`, `.public`, `.mode`, `.mode private`, `.mode public`.
+
+- **Public** (default): everyone can use non-owner commands in private chats and groups.
+- **Private**: only the owner can use bot commands and ordinary-message hooks (including AI auto-replies) in private chats or groups.
+- The mode is stored in `data/settings.json` and survives restart when the data directory is persistent.
+- Owner numbers must be correctly set in `config.js` (`owners`); otherwise use the paired bot's own account to recover access.
+- Existing group-participant welcome/goodbye events and status automation are separate background features and are not disabled by private mode.
+- `.public` does not override individual owner-only command restrictions or group admin permissions.
 
 ## 📚 Commands
 
@@ -487,7 +544,7 @@ The separate [hack.js](plugins/hack.js) provides an owner-only `.hack` simulatio
 
 Mini-games keep one active session per chat for up to 10 minutes and allow three wrong attempts. Sessions are in memory and reset when the bot restarts. No API key is required.
 
-### 🔄 Updating after new commands
+### 🔄 Updating the bot
 
 ```bash
 git pull origin main
@@ -674,8 +731,9 @@ Some YouTube or Instagram media tools may need authenticated browser cookies for
 If the specific downloader/plugin supports a Netscape-format cookie file, export cookies **from your own logged-in browser session** using a trusted local tool and store them privately on your hosting server:
 
 ```text
-cookies.txt             # example: YouTube cookies
-cookies_instagram.txt   # example: Instagram cookies
+cookies-youtube.txt     # YouTube-specific cookies
+cookies-instagram.txt   # Instagram-specific cookies
+cookies.txt             # Shared fallback cookies
 ```
 
 The repository's `.gitignore` already excludes `cookies*.txt`. That protects against ordinary Git commits, **not** against disclosure in logs, backups or an exposed web directory.
@@ -686,7 +744,7 @@ The repository's `.gitignore` already excludes `cookies*.txt`. That protects aga
 - **Railway:** Do **not** commit cookie files. Use a secure, supported secret-file provisioning method and a persistent volume; Railway Variables are strings, not automatically mounted files. Check that the downloader actually reads the intended file path.
 - **Render/Replit/Heroku:** Verify how private files are provisioned and whether they survive restarts. Ephemeral filesystems can erase cookie files.
 
-**Compatibility note:** File names alone do not enable cookies. The actual YouTube/Instagram downloader code must be configured to pass its cookie-file path (for example, a `--cookies /private/path/cookies.txt` argument for yt-dlp). Different plugins may use different tools and formats. Confirm support in the relevant plugin before relying on these files.
+**Compatibility note:** The repository’s `lib/dl.js` checks `cookies-<platform>.txt` first and then `cookies.txt` in the project root. A valid Netscape cookie file and permission to access the content are still required. Do not place these files in `node_modules/` or share them.
 
 **Troubleshooting:** If downloads fail, check the downloader logs, cookie expiry, required login/verification, access permissions and platform terms. Re-export your own cookies only when necessary; never use someone else's session or try to bypass access restrictions.
 
@@ -699,6 +757,22 @@ The repository's `.gitignore` already excludes `cookies*.txt`. That protects aga
 - Review external plugins before installing them.
 - Respect WhatsApp and third-party service terms. Avoid spam and unsolicited automation.
 - Hosting prices, free plans and quotas can change; verify before deploying.
+
+## 🤝 Contributing
+
+Pull requests, reproducible bug reports and documentation improvements are welcome.
+
+1. Fork the repository and create a focused feature branch.
+2. Make changes in the relevant `plugins/`, `lib/` or deployment file.
+3. Check JavaScript syntax and test on a private WhatsApp session before opening a pull request.
+4. Describe expected behavior, limitations and required environment variables.
+5. Never attach real pairing codes, session files, passwords or cookies to a GitHub issue.
+
+For a minimal command template, see [`plugins/_template.js.txt`](plugins/_template.js.txt).
+
+## ⚖️ Disclaimer
+
+RAM_MD is an independent, unofficial project; it is not affiliated with WhatsApp, Meta, Garena or any media platform. Use it responsibly, respect platform terms and only save content you own or are authorized to access. API/hosting availability and software compatibility can change.
 
 ## 🔗 Support
 
@@ -715,8 +789,8 @@ The repository's `.gitignore` already excludes `cookies*.txt`. That protects aga
 
 <div align="center">
 
-**❤️ MADE WITH LOVE BY SANJOY X TECH**
+**Maintained by SANJOY MAHATO • SANJOY X TECH**
 
-**『ＲＡＭ_ＭＤ』⚡**
+**⚡ 『ＲＡＭ－ＭＤ』 • Built for learning, automation & community**
 
 </div>
