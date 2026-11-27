@@ -72,7 +72,7 @@ module.exports={
     if (field==='show'||field==='help'||field==='list') return reply(info(config));
     if (field === 'preview') {
       const { buildMenu } = require('./menu');
-      return reply('🎨 *CURRENT MENU PREVIEW*\\n\\n' + buildMenu(plugins, config, {isOwner:true}));
+      return reply('🎨 *CURRENT MENU PREVIEW*\n\n' + buildMenu(plugins, config, {isOwner:true}));
     }
 
     if (field==='reset') {
