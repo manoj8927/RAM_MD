@@ -205,7 +205,10 @@ async function installFiles(files, reply, reloadPlugins, p) {
         await reply(`Skipped ${file}: ${e.message}`);
       }
     }
-    reloadPlugins();
-    if (installed.length) await reply('Installed: ' + installed.join(', ') + `\nSend ${p}menu to see it.`);
-    else await reply('No compatible plugins installed. Supported: RAM_MD command/run or basic Levanter Module({pattern}, handler).');
+    if (installed.length) {
+      reloadPlugins();
+      await reply('Installed: ' + installed.join(', ') + `\nSend ${p}menu to see it.`);
+    } else {
+      await reply('No compatible plugins installed. Supported: RAM_MD command/run or basic Levanter Module({pattern}, handler).');
+    }
 }
