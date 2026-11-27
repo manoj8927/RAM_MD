@@ -323,7 +323,7 @@ pm2 save
 pm2 logs status-bot
 ```
 
-To enable boot startup, run `pm2 startup` and follow its printed instructions. The PM2 config starts `index.js` directly; keep its working directory on persistent disk. **Note:** this PM2 entry bypasses the `deploy/start.js` bootstrap, so setting `BOT_STORAGE_DIR` alone does not create session symlinks when using `ecosystem.config.cjs`. Keep `auth/` and `data/` persistent yourself (or adapt the PM2 entry to run the bootstrap), and do not start a duplicate WhatsApp session.
+To enable boot startup, run `pm2 startup` and follow its printed instructions, then `pm2 save`. The PM2 config **now runs `deploy/start.js`**, the same bootstrap used by `npm start`. If `BOT_STORAGE_DIR` is configured on a mounted persistent disk, the bootstrap links `auth/` and `data/` into that directory. **If local `auth/` or `data/` already exist, back up and migrate them first**: for safety, the bootstrap will refuse to overwrite an existing paired session. On an already-running bot, restart its existing PM2 app rather than starting a duplicate WhatsApp session. PM2 does not prevent a hosting provider from suspending or deleting a server.
 
 **Updating the bot:**
 
@@ -774,6 +774,18 @@ The repository's `.gitignore` already excludes `cookies*.txt`. That protects aga
 **Compatibility note:** The repository’s `lib/dl.js` checks `cookies-<platform>.txt` first and then `cookies.txt` in the project root. A valid Netscape cookie file and permission to access the content are still required. Do not place these files in `node_modules/` or share them.
 
 **Troubleshooting:** If downloads fail, check the downloader logs, cookie expiry, required login/verification, access permissions and platform terms. Re-export your own cookies only when necessary; never use someone else's session or try to bypass access restrictions.
+
+### 🧩 Plugin manager and reaction commands
+
+The owner can manage **additional** GitHub Gist plugins with `.plugin <gist URL>`, review the source, then send the displayed `.plugin approve <code>`. New Gists must be HTTPS, JavaScript-only, within the size limit and use a filename that is **not already installed**. Existing/bundled commands cannot be overwritten or deleted via the plugin manager. To update a user-added plugin, first review and explicitly remove its old file.
+
+- `.plugin list` — lists bundled (core) and additional plugin files.
+- `.plugin remove <name.js>` — deletes **only user-installed** plugin files.
+- `.areact on/off` — controls reactions to incoming chat messages.
+- `.autoreact on/off` — controls **WhatsApp status/story reactions**, not chat reactions.
+
+> [!WARNING]
+> A JavaScript plugin executes with the bot's filesystem and environment access after installation. Only approve Gists you have inspected and trust. Review the exact source before installing; syntax checks do **not** make arbitrary JavaScript safe.
 
 ## 🔒 Security
 
