@@ -919,3 +919,17 @@ RAM_MD is an independent, unofficial project; it is not affiliated with WhatsApp
 **⚡ 『ＲＡＭ－ＭＤ』 • Built for learning, automation & community**
 
 </div>
+
+
+## 📥 RAM Downloader API plugin
+
+Optional integration with your public API at **https://api.smp-tech.eu.cc**:
+
+- `.ramapi` — show API health.
+- `.ramdl <public-media-url>` — look up compatible public video/audio formats through the API.
+- Supported URL platforms: YouTube, Instagram, Facebook, TikTok, Twitter/X, Pinterest and SoundCloud.
+
+To enable it, set `RAM_DOWNLOADER_API_KEY` privately on the bot host to the same value as Altare's `API_KEY`. Optional: `RAM_DOWNLOADER_API_URL=https://api.smp-tech.eu.cc` and `RAM_DOWNLOADER_MAX_HEIGHT=720`. Restart the bot to apply new environment variables.
+
+The API returns metadata and temporary media links (not ready-made files). Some links cannot be sent because video/audio streams are separate, URLs expire, or site access is restricted. The existing downloader commands remain unchanged. See [RAM Downloader API setup and limitations](docs/RAM_DOWNLOADER_API.md).
+
