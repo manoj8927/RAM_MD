@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node deploy/start.js",
-    "test": "node --test tests/menu.test.js"
+    "test": "node --test tests/menu.test.js tests/core.test.js"
   },
   "dependencies": {
     "@whiskeysockets/baileys": "7.0.0-rc14",
