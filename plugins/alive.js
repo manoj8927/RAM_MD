@@ -22,20 +22,27 @@ function indiaTime() {
 
 function details(config) {
   const mem = process.memoryUsage();
-  return [
+  const lines = [
     `*${config.botName || 'RAM-MD'}*`,
     '',
     '✅ *Status:* Online / Running',
     `⏱️ *Uptime:* ${formatUptime(process.uptime())}`,
     `🕒 *India Time:* ${indiaTime()}`,
     `📦 *Version:* ${config.version || pkg.version || 'unknown'}`,
-    `🟢 *Node.js:* ${process.version}`,
-    `💾 *Memory:* ${(mem.rss / 1024 / 1024).toFixed(1)} MB RSS`,
-    `🖥️ *Platform:* ${process.platform} ${process.arch}`,
-    `⚙️ *CPU:* ${os.cpus().length} cores`,
+  ];
+  if (config.aliveShowSystemStats !== false) {
+    lines.push(
+      `🟢 *Node.js:* ${process.version}`,
+      `💾 *Memory:* ${(mem.rss / 1024 / 1024).toFixed(1)} MB RSS`,
+      `🖥️ *Platform:* ${process.platform} ${process.arch}`,
+      `⚙️ *CPU:* ${os.cpus().length} cores`
+    );
+  }
+  lines.push(
     `🌐 *Website:* ${config.websiteUrl || 'https://ram-md.blogspot.com/'}`,
-    `💬 *Support:* ${config.supportUrl || 'https://t.me/Ramboss67'}`,
-  ].join('\n');
+    `💬 *Support:* ${config.supportUrl || 'https://t.me/Ramboss67'}`
+  );
+  return lines.join('\\n');
 }
 
 module.exports = {
