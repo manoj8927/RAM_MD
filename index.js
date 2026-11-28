@@ -154,6 +154,30 @@ async function start() {
     markOnlineOnConnect: false,
   });
 
+  // Apply forwarded-many-times metadata to command replies (including plugin
+  // replies sent directly through sock.sendMessage). Do not modify status
+  // reactions, protocol messages, or ordinary non-command messages.
+  const originalSendMessage = sock.sendMessage.bind(sock);
+  let commandReplyDepth = 0;
+  sock.sendMessage = (jid, content, options = {}) => {
+    if (commandReplyDepth > 0 && content && typeof content === 'object' &&
+        !content.react && !content.delete && !content.edit &&
+        !content.forward && !content.protocolMessage &&
+        (content.text != null || content.caption != null ||
+         content.image || content.video || content.audio || content.document)) {
+      const previous = content.contextInfo || {};
+      content = {
+        ...content,
+        contextInfo: {
+          ...previous,
+          isForwarded: true,
+          forwardingScore: Math.max(5, Number(previous.forwardingScore) || 0),
+        },
+      };
+    }
+    return originalSendMessage(jid, content, options);
+  };
+
   starting = false;
   let pairingTimer = null;
   let disconnectHandled = false;
@@ -378,7 +402,8 @@ async function start() {
           continue;
         }
 
-        await plugin.run({
+        commandReplyDepth++;
+        try { await plugin.run({
           sock,
           msg,
           from,
@@ -390,7 +415,7 @@ async function start() {
           plugins: uniquePlugins(),
           reloadPlugins: loadPlugins,
           reply: (t) => sock.sendMessage(from, { text: t }, { quoted: msg }),
-        });
+        }); } finally { commandReplyDepth--; }
       } catch (e) {
         console.error('Handler error:', e);
       }
