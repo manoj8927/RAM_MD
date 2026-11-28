@@ -8,6 +8,7 @@ const {
 const pino = require('pino');
 const fs = require('fs');
 const path = require('path');
+const { AsyncLocalStorage } = require('async_hooks');
 const { backupLoggedOutAuth } = require('./lib/session-recovery');
 const config = require('./config');
 require('./lib/store').applySaved(config); // settings changed from WhatsApp survive a restart
@@ -158,9 +159,10 @@ async function start() {
   // replies sent directly through sock.sendMessage). Do not modify status
   // reactions, protocol messages, or ordinary non-command messages.
   const originalSendMessage = sock.sendMessage.bind(sock);
-  let commandReplyDepth = 0;
+  // Async context prevents one command from tagging unrelated concurrent messages.
+  const commandReplyContext = new AsyncLocalStorage();
   sock.sendMessage = (jid, content, options = {}) => {
-    if (commandReplyDepth > 0 && content && typeof content === 'object' &&
+    if (commandReplyContext.getStore() === true && content && typeof content === 'object' &&
         !content.react && !content.delete && !content.edit &&
         !content.forward && !content.protocolMessage &&
         (content.text != null || content.caption != null ||
@@ -402,8 +404,8 @@ async function start() {
           continue;
         }
 
-        commandReplyDepth++;
-        try { await plugin.run({
+        await commandReplyContext.run(true, async () => {
+          await plugin.run({
           sock,
           msg,
           from,
@@ -415,7 +417,8 @@ async function start() {
           plugins: uniquePlugins(),
           reloadPlugins: loadPlugins,
           reply: (t) => sock.sendMessage(from, { text: t }, { quoted: msg }),
-        }); } finally { commandReplyDepth--; }
+          });
+        });
       } catch (e) {
         console.error('Handler error:', e);
       }
