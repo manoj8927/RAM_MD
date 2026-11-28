@@ -1,0 +1,19 @@
+name: One-time Royal Menu links test
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-time-royal-links-test.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --omit=optional
+      - run: node --test tests/royal-menu.test.js
