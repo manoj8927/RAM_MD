@@ -17,6 +17,7 @@ const cfg = {
   ownerName:'SANJOY MAHATO',
   owners:['917047294917'],
   youtubeUrl:'https://youtu.be/WlPkFgc6FRw',
+  githubUrl:'https://github.com/manoj8927/RAM_MD',
   websiteUrl:'https://ram-md.blogspot.com/',
   supportUrl:'https://t.me/Ramboss67',
   version:'1.0.0',
@@ -36,6 +37,7 @@ test('Royal style validates while other menu styles remain available',()=>{
     assert.equal(store.validate('menuStyle',style),style);
   assert.throws(()=>store.validate('menuStyle','fake'),/Invalid menuStyle/);
   assert.equal(store.validate('youtubeUrl','https://youtu.be/WlPkFgc6FRw'),'https://youtu.be/WlPkFgc6FRw');
+  assert.equal(store.validate('githubUrl','https://github.com/manoj8927/RAM_MD'),'https://github.com/manoj8927/RAM_MD');
   assert.throws(()=>store.validate('youtubeUrl','http://127.0.0.1/'),/public HTTPS/);
   assert.equal(custom.owner,true);
   assert.match(custom.info({...cfg}),/royal/);
@@ -49,6 +51,9 @@ test('Royal card resembles requested layout using real values, never screenshot 
   assert.match(card,/SANJOY MAHATO/);
   assert.match(card,/wa\.me\/917047294917/);
   assert.match(card,/YouTube/);
+  assert.match(card,/youtu\.be\/WlPkFgc6FRw/);
+  assert.match(card,/GitHub/);
+  assert.match(card,/github\.com\/manoj8927\/RAM_MD/);
   assert.match(card,/User:\* ram bhai/);
   assert.match(card,/Number:\* \+919876543210/);
   assert.match(card,/Version:\* v1\.0\.0/);
