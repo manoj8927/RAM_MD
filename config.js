@@ -23,7 +23,8 @@ module.exports = {
   aliveCaption: 'RAM-MD is ready!', // .custom alivecaption
   supportUrl: 'https://t.me/Ramboss67', // .custom support
   websiteUrl: 'https://ram-md.blogspot.com/', // .custom website
-  youtubeUrl: 'https://youtu.be/WlPkFgc6FRw', // optional RAM-MD tutorial link in royal menu
+  youtubeUrl: 'https://youtu.be/WlPkFgc6FRw', // RAM-MD video tutorial
+  githubUrl: 'https://github.com/manoj8927/RAM_MD', // official source link in royal menu
   newsletterJid: '120363413703815929@newsletter',
   newsletterName: 'ＲＡＭ－ＭＤ',
 
