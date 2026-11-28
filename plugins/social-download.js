@@ -39,14 +39,14 @@ module.exports = {
         const job = dl.newJob();
         try {
           const bin = await dl.ytdlp();
-          const ff = dl.ffmpegPath();
+          const ff = dl.audioPostprocessor(); // Only merge when both ffmpeg and ffprobe work
           const args = [
             '--no-playlist', '--no-warnings',
             '--max-filesize', '75M',
             '--match-filter', 'duration<=1500',
             '-o', path.join(job.dir, '%(id)s.%(ext)s'),
             '-f', ff ? 'bv*+ba/b' : 'b[ext=mp4]/b',
-            ...(ff ? ['--ffmpeg-location', ff, '--merge-output-format', 'mp4'] : []),
+            ...(ff ? [...(ff.location ? ['--ffmpeg-location', ff.location] : []), '--merge-output-format', 'mp4'] : []),
             ...dl.cookiesArgs(platform),
             '--', url,
           ];
