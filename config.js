@@ -18,11 +18,12 @@ module.exports = {
   menuShowSupport: true, // menu setting #16: show Telegram support link
   menuShowFooter: true, // menu setting #17: show custom footer
   aliveShowSystemStats: true, // alive setting #18: show Node/CPU/memory details
-  menuStyle: 'classic', // classic, compact, neon or minimal (.custom style)
+  menuStyle: 'royal', // royal, classic, compact, neon or minimal (.custom style)
   menuFooter: 'SANJOY X TECH', // .custom footer
   aliveCaption: 'RAM-MD is ready!', // .custom alivecaption
   supportUrl: 'https://t.me/Ramboss67', // .custom support
   websiteUrl: 'https://ram-md.blogspot.com/', // .custom website
+  youtubeUrl: 'https://youtu.be/WlPkFgc6FRw', // optional RAM-MD tutorial link in royal menu
   newsletterJid: '120363413703815929@newsletter',
   newsletterName: 'ＲＡＭ－ＭＤ',
 
