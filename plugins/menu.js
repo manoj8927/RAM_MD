@@ -120,6 +120,7 @@ function royalCard(groups, config, opts = {}) {
   const ownerNo = String((config.owners || [])[0] || '').replace(/\D/g,'');
   const contact = /^[1-9]\d{7,14}$/.test(ownerNo) ? 'https://wa.me/'+ownerNo : '';
   const tutorial = /^https:\/\//.test(String(config.youtubeUrl || '')) ? clean(config.youtubeUrl) : '';
+  const github = /^https:\/\/github\.com\//.test(String(config.githubUrl || '')) ? clean(config.githubUrl) : '';
   const requester = getRequester(opts.msg,opts.from);
   const {date,time} = currentIndiaTime();
   const memory = memoryInfo();
@@ -128,6 +129,7 @@ function royalCard(groups, config, opts = {}) {
     '│ 👨‍💻 *Developer:* '+developer,
     ...(config.menuShowSupport !== false && contact ? ['│ 🔧 *Dev No:* '+contact] : []),
     ...(tutorial ? ['│ ▶️ *YouTube:* '+tutorial] : []),
+    ...(github ? ['│ 💻 *GitHub:* '+github] : []),
     '│ 👑 *Owner:* '+developer,
     ...(config.menuShowSupport !== false && contact ? ['│ 📞 *Contact:* '+contact] : []),
     '│ 👤 *User:* '+requester.name,
