@@ -45,7 +45,7 @@ async function deliver(ctx, target, audio, chosenSide) {
       const job = dl.newJob();
       try {
         const bin = await dl.ytdlp();
-        const ff = dl.ffmpegPath();
+        const ff = dl.audioPostprocessor(); // merge requires both ffmpeg and ffprobe
         const side = chosenSide || Math.min(1080, Number(config.ytMaxHeight) || 1080);
         const titleFile = path.join(job.dir, 'title.txt');
         const args = [
@@ -70,7 +70,7 @@ async function deliver(ctx, target, audio, chosenSide) {
             args.push('-f', 'bestaudio[ext=m4a]/bestaudio[acodec^=mp4a]/bestaudio');
           }
         } else if (ff) {
-          args.push('--ffmpeg-location', ff);
+          if (ff.location) args.push('--ffmpeg-location', ff.location);
           // best picture up to the chosen size, H.264 preferred; res = the shorter side, so Shorts work too
           args.push('-f', 'bv*+ba/b', '-S', `res:${side},vcodec:h264,acodec:aac`, '--merge-output-format', 'mp4');
         } else {
