@@ -58,12 +58,19 @@ async function deliver(ctx, target, audio, chosenSide) {
           '-o', path.join(job.dir, '%(id)s.%(ext)s'),
           ...dl.cookiesArgs('youtube'),
         ];
-        if (ff) args.push('--ffmpeg-location', ff);
-
+        // An ffmpeg-static binary without ffprobe cannot convert to MP3.
+        // Without both tools, download an already encoded M4A/other audio
+        // instead of failing in yt-dlp's postprocessing phase.
+        const audioTools = audio ? dl.audioPostprocessor() : null;
         if (audio) {
-          if (ff) args.push('-f', 'bestaudio', '-x', '--audio-format', 'mp3', '--audio-quality', '5');
-          else args.push('-f', 'bestaudio[ext=m4a]/bestaudio');
+          if (audioTools) {
+            if (audioTools.location) args.push('--ffmpeg-location', audioTools.location);
+            args.push('-f', 'bestaudio', '-x', '--audio-format', 'mp3', '--audio-quality', '5');
+          } else {
+            args.push('-f', 'bestaudio[ext=m4a]/bestaudio[acodec^=mp4a]/bestaudio');
+          }
         } else if (ff) {
+          args.push('--ffmpeg-location', ff);
           // best picture up to the chosen size, H.264 preferred; res = the shorter side, so Shorts work too
           args.push('-f', 'bv*+ba/b', '-S', `res:${side},vcodec:h264,acodec:aac`, '--merge-output-format', 'mp4');
         } else {
@@ -106,6 +113,9 @@ async function deliver(ctx, target, audio, chosenSide) {
     const full = (e.full || e.message || '').toString();
     if (/not a bot|sign in|confirm you/i.test(full)) {
       return reply('YouTube asked for a sign-in check. Add a file named cookies-youtube.txt (exported from a logged-in browser) next to index.js and try again.');
+    }
+    if (/ffprobe and ffmpeg not found|ffmpeg and ffprobe not found|Postprocessing: ffprobe/i.test(full)) {
+      return reply('Audio conversion tools are unavailable. Restart the updated bot; it will fall back to M4A without FFmpeg. For MP3, install both ffmpeg and ffprobe.');
     }
     console.log('yt error:', full.slice(-500));
     return reply('Failed: ' + String(e.message).slice(0, 200));
