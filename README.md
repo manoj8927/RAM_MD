@@ -1,32 +1,3 @@
-## 👑 Screenshot-style Royal WhatsApp Menu
-
-The default \`.menu\` now has a **Royal** profile layout inspired by the WhatsApp reference: a decorated title, developer and owner, optional \`wa.me\` contact, YouTube tutorial, requesting user's display name, version, mode, date/time (India / IST), real available command count, prefix, process RAM and uptime. The category list remains underneath.
-
-**No fabricated metrics:** the bot counts actually loaded visible commands. RAM reports live Node.js RSS in MB, plus a usage percentage/bar **only if a real constrained process memory limit is available**. Times are formatted in Asia/Kolkata even when the host runs in another timezone. It does not copy the other bot's developer names or phone numbers.
-
-Try in WhatsApp:
-
-\`\`\`text
-.menu
-.menu download
-.menu games
-.menu all
-.menu search song
-.custom style royal
-.custom preview
-.custom youtube https://youtu.be/WlPkFgc6FRw
-.custom ownername SANJOY MAHATO
-.custom menuimage https://example.com/cover.jpg
-\`\`\`
-
-**Styles:** \`royal\` (default), \`classic\`, \`compact\`, \`neon\`, and \`minimal\`. The Royal info card is used in the image caption when short enough; categories are sent separately. If the image cannot load, a complete text-only Royal menu is sent instead.
-
-To hide the image, use \`.settings 12 off\`; to hide uptime, use \`.settings 14 off\`; to hide the contact/support links, use \`.settings 16 off\`. Styling changes persist in \`data/settings.json\` if your hosting provides persistent storage.
-
-Use \`npm test\` to validate formatting and navigation after deploying \`main\`. WhatsApp live display still depends on the device and Baileys implementation.
-
----
-
 <div align="center">
 
 # ⚡ 『ＲＡＭ－ＭＤ』
