@@ -50,6 +50,13 @@ function bestFormat(data, platform) {
     const audio = list.find(f => https(f) && hasAudio(f) && !hasVideo(f) && ['mp3', 'm4a'].includes(ext(f)));
     if (audio) return { type: 'audio', url: audio.url, ext: ext(audio) };
   }
+  // Instagram photo posts may expose a direct image instead of video formats.
+  if (platform === 'instagram' || platform === 'pinterest') {
+    const image = list.find(f => https(f) && ['jpg','jpeg','png','webp'].includes(ext(f)));
+    const direct = [data?.image, data?.image_url, data?.thumbnail, data?.url]
+      .find(u => typeof u === 'string' && /^https:\/\//i.test(u) && /\.(?:jpe?g|png|webp)(?:[?#]|$)/i.test(u));
+    if (image || direct) return {type:'image', url:image?.url || direct};
+  }
   return null;
 }
 
@@ -114,6 +121,12 @@ module.exports = {
         return reply('⚠️ The API returned metadata, but no ready-to-send video with audio (or supported SoundCloud audio). ' +
           'Try the existing ' + prefix + 'video / ' + prefix + 'fb / ' + prefix + 'ig / ' + prefix + 'tiktok commands.');
       }
+      if (media.type === 'image') {
+        return sock.sendMessage(from, {
+          image: {url: media.url},
+          caption: '📷 *RAM DOWNLOADER API*\\n' + String(data.title || platform + ' photo').slice(0,180),
+        }, {quoted:msg});
+      }
       if (media.type === 'audio') {
         return sock.sendMessage(from, {
           audio: { url: media.url },
@@ -130,7 +143,8 @@ module.exports = {
       }, { quoted: msg });
     } catch (error) {
       // Do not log secret API keys or short-lived signed media URLs.
-      console.log('[ramdl] error:', error.status || error.code || error.name);
+      const stage = error.status ? 'API HTTP' : (error.name === 'TimeoutError' || error.name === 'AbortError' ? 'API timeout / media fetch' : 'media delivery / network');
+      console.log('[ramdl] error stage:', stage, 'code:', error.status || error.code || error.name, 'message:', String(error.message || '').slice(0,180));
       if (error.status === 401 || error.status === 403) return reply(key
         ? '🔐 RAM API rejected the configured key (HTTP ' + error.status + '). Verify RAM_DOWNLOADER_API_KEY on this bot host matches API_KEY on the API server.'
         : '🔐 RAM API requires a private key (HTTP ' + error.status + '). Set RAM_DOWNLOADER_API_KEY securely on this bot host to match API_KEY on your API server.');
@@ -138,7 +152,9 @@ module.exports = {
       if (error.status === 503) return reply('❌ RAM API service is temporarily unavailable (HTTP 503). Verify the API server is running.');
       if (error.status === 429) return reply('❌ API busy or rate-limited. Try later.');
       if (error.status === 502) return reply('❌ The source could not be extracted by the RAM API (HTTP 502).');
-      return reply('❌ RAM Downloader failed. The link may have expired or require media headers. Existing download commands remain available.');
+      return reply('❌ RAM Downloader failed (' + (error.code || error.name || 'network/media') + ').\\n' +
+        'Possible API extraction or WhatsApp media fetch failure. ' +
+        'Try ' + prefix + (platform === 'instagram' ? 'ig' : platform === 'youtube' ? 'ytmp4' : platform === 'facebook' ? 'fb' : platform === 'tiktok' ? 'tt' : 'ramapi') + ' with the same link. Check bot logs for [ramdl] error stage.');
     }
   },
 };
