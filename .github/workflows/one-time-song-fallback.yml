@@ -1,0 +1,17 @@
+name: One-time Song FFmpeg fallback tests
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-time-song-fallback.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/song-ffmpeg-fallback.test.js
