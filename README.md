@@ -1,3 +1,26 @@
+## 🎵 Fix: .song / .play — FFmpeg and FFprobe missing
+
+The music downloader now checks whether **both** `ffmpeg` and `ffprobe` are usable before requesting yt-dlp MP3 postprocessing. A bundled `ffmpeg-static` alone is not a complete MP3 conversion toolchain.
+
+- **Both installed:** `.song`, `.play` and `.ytmp3` extract and send MP3 audio.
+- **Missing FFprobe or FFmpeg:** The bot skips conversion and downloads ready-made M4A audio, which WhatsApp can receive as an audio message. Other available audio formats may be delivered as documents.
+- **Video downloading:** Existing behaviour is unchanged.
+
+For Linux VPS, install the full package (the package includes ffprobe):
+
+```bash
+sudo apt-get update
+sudo apt-get install -y ffmpeg
+ffmpeg -version
+ffprobe -version
+```
+
+For **OptikLink/Pterodactyl**, if no sudo/root or `apt-get` is available, deploy the latest `main` and restart your bot. The M4A fallback is designed to work without installing system FFmpeg; the host still needs a working yt-dlp binary, Node.js and enough memory/storage. Check your egg's container image for FFmpeg if MP3 is required. Optionally set `FFMPEG_LOCATION` to a directory containing **both** executable files named `ffmpeg` and `ffprobe`.
+
+Test with `.song <name>` or `.ytmp3 <YouTube link>`. A file or media request may still fail due to YouTube anti-bot blocks, cookies, country restrictions or deleted videos.
+
+---
+
 <div align="center">
 
 # ⚡ 『ＲＡＭ－ＭＤ』
