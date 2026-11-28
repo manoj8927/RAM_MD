@@ -1,6 +1,7 @@
 'use strict';
 
 const pkg = (() => { try { return require('../package.json'); } catch (_) { return {}; } })();
+const os = require('os');
 const { sendQuickReplies } = require('../lib/buttons');
 
 const ORDER = ['Download', 'Games', 'Tools', 'Media', 'Group', 'Profile', 'Settings', 'General'];
@@ -78,7 +79,87 @@ function pageParts(lines, max = PAGE_LIMIT) {
   return pages;
 }
 
-function overview(groups, config) {
+
+function getRequester(msg, from) {
+  const chat = String(from || msg?.key?.remoteJid || '');
+  const member = String(msg?.key?.participant || (chat.endsWith('@g.us') ? '' : chat));
+  const name = clean(msg?.pushName || msg?.verifiedBizName || 'WhatsApp User') || 'WhatsApp User';
+  // Never treat the number-like part of a LID as a real phone number.
+  const phone = /^([1-9]\d{7,14})(?::\d+)?@s\.whatsapp\.net$/.exec(member)?.[1] || '';
+  return { name, phone: chat.endsWith('@g.us') ? '' : phone };
+}
+
+function currentIndiaTime(date = new Date()) {
+  const format = (opts) => new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Kolkata', ...opts
+  }).format(date);
+  return {
+    date: format({year:'numeric',month:'2-digit',day:'2-digit'}).split('/').reverse().join('-'),
+    time: format({hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}),
+  };
+}
+
+function memoryInfo() {
+  const rss = process.memoryUsage().rss;
+  const mb = (rss / 1024 / 1024).toFixed(0) + ' MB';
+  // A real container/Node memory limit is preferable to the host's RAM total.
+  const limit = typeof process.constrainedMemory === 'function'
+    ? process.constrainedMemory() : 0;
+  if (!Number.isFinite(limit) || limit <= 0 || limit < rss) return {label:mb,bar:''};
+  const pct = Math.min(100, Math.max(0, Math.round(rss / limit * 100)));
+  const n = Math.min(10, Math.max(0, Math.round(pct / 10)));
+  return {label:mb+' ('+pct+'% of limit)',bar:'▰'.repeat(n)+'▱'.repeat(10-n)};
+}
+
+function royalCard(groups, config, opts = {}) {
+  const p = clean(config.prefix || '.');
+  const name = clean(config.botName || 'RAM-MD');
+  const developer = clean(config.ownerName || 'SANJOY MAHATO');
+  const count = groups.reduce((sum,g) => sum + g.commands.length,0);
+  const version = clean(config.version || pkg.version || '1.0.0');
+  const mode = config.mode === 'private' ? 'PRIVATE 🔒' : 'PUBLIC 🌍';
+  const ownerNo = String((config.owners || [])[0] || '').replace(/\D/g,'');
+  const contact = /^[1-9]\d{7,14}$/.test(ownerNo) ? 'https://wa.me/'+ownerNo : '';
+  const requester = getRequester(opts.msg,opts.from);
+  const {date,time} = currentIndiaTime();
+  const memory = memoryInfo();
+  const lines = [
+    '╭━━〔 👑 *'+name+'* 👑 〕━━╮',
+    '│ 👨‍💻 *Developer:* '+developer,
+    '│ 👑 *Owner:* '+developer,
+    ...(config.menuShowSupport !== false && contact ? ['│ 🔧 *Contact:* '+contact] : []),
+    '│ 👤 *User:* '+requester.name,
+    ...(requester.phone ? ['│ 📱 *Number:* +'+requester.phone] : []),
+    '│ 🏷️ *Version:* v'+version,
+    '│ 🔐 *Mode:* '+mode,
+    '├─────────────────',
+    '│ 📅 *Date:* '+date,
+    '│ 🕒 *Time:* '+time+' IST',
+    '│ 📊 *Cmds:* '+count+' available',
+    '│ ⚙️ *Prefix:* [ '+p+' ]',
+    '│ 💾 *RAM:* '+memory.label,
+    ...(memory.bar ? ['│ '+memory.bar] : []),
+    ...(config.menuShowUptime !== false ? ['│ ⏱️ *Uptime:* '+runtime(process.uptime())] : []),
+    '╰━━━━━━━━━━━━━━━━━━╯'
+  ];
+  return lines.join('\n');
+}
+
+function royalCategories(groups, config) {
+  const p = clean(config.prefix || '.');
+  const lines = ['', '╭━━〔 📂 *COMMAND CATEGORIES* 〕━━╮'];
+  groups.forEach((g,i) => lines.push('│ '+(i+1)+'. '+(EMOJI[g.category] || '📁')+' *'+clean(g.category)+'* ('+g.commands.length+')'));
+  lines.push('╰━━━━━━━━━━━━━━━━━━╯',
+    '', '🔎 *'+p+'menu search song*  •  📚 *'+p+'menu all*',
+    '📥 *'+p+'menu download*  •  ⚙️ *'+p+'settings*');
+  if(config.menuShowWebsite !== false && config.websiteUrl) lines.push('🌐 '+clean(config.websiteUrl));
+  if(config.menuShowSupport !== false && config.supportUrl) lines.push('💬 '+clean(config.supportUrl));
+  if(config.menuShowFooter !== false && config.menuFooter) lines.push('⚡ '+clean(config.menuFooter));
+  return lines.join('\n');
+}
+
+function overview(groups, config, opts = {}) {
+  if (config.menuStyle === 'royal') return royalCard(groups, config, opts) + royalCategories(groups, config);
   const prefix = clean(config.prefix || '.');
   const name = clean(config.botName || 'RAM-MD');
   const count = groups.reduce((n, g) => n + g.commands.length, 0);
@@ -151,10 +232,10 @@ function buildMenu(plugins, config, opts = {}) {
   const groups = collect(plugins, opts.isOwner !== false);
   if (opts.category) {
     const category = findCategory(groups, opts.category);
-    return category ? commandLines([category], config).join('\n').trim() : overview(groups, config);
+    return category ? commandLines([category], config).join('\n').trim() : overview(groups, config, opts);
   }
   if (opts.all) return commandLines(groups, config).join('\n').trim();
-  return overview(groups, config);
+  return overview(groups, config, opts);
 }
 
 module.exports = {
@@ -163,7 +244,7 @@ module.exports = {
   menu: ['menu', 'help'],
   category: 'General',
   desc: '.menu | .menu all | .menu download | .menu 1 | .menu search <name>',
-  buildMenu, rawUrl, collect, pageParts,
+  buildMenu, rawUrl, collect, pageParts, royalCard, royalCategories, getRequester, currentIndiaTime, memoryInfo,
   async run({ sock, msg, from, plugins, config, reply, text, args, isOwner }) {
     const groups = collect(plugins, isOwner);
     const prefix = clean(config.prefix || '.');
@@ -195,14 +276,17 @@ module.exports = {
       return;
     }
 
-    const cover = overview(groups, config);
+    const cover = overview(groups, config, {msg,from});
     const image = config.menuImageEnabled === false ? '' : rawUrl(config.menuImage);
     let coverSent = false;
     if (image) {
       try {
         // WhatsApp image captions have a lower text limit than ordinary text messages.
         // Keep navigation readable and always send the complete overview separately if needed.
-        const caption = cover.length <= 900 ? cover : [
+        const profile = config.menuStyle === 'royal'
+          ? royalCard(groups, config, {msg,from})
+          : cover;
+        const caption = profile.length <= 900 ? profile : [
           '⚡ *RAM-MD MENU*', '🤖 ' + clean(config.botName || 'RAM-MD'),
           '🔐 ' + (config.mode === 'private' ? 'PRIVATE' : 'PUBLIC'),
           '📂 Categories: ' + groups.length,
@@ -216,7 +300,10 @@ module.exports = {
       }
     }
 
-    if (!coverSent || cover.length > 900) await reply(cover);
+    if (config.menuStyle === 'royal' && coverSent) {
+      // Profile goes in image caption; navigation goes in a second text message.
+      await reply(royalCategories(groups, config));
+    } else if (!coverSent || cover.length > 900) await reply(cover);
 
     // Optional tap navigation; typed equivalents in the overview always work.
     if (config.menuButtons === true && typeof sock.relayMessage === 'function') {
