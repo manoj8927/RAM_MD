@@ -1,7 +1,6 @@
 'use strict';
 
 const pkg = (() => { try { return require('../package.json'); } catch (_) { return {}; } })();
-const os = require('os');
 const { sendQuickReplies } = require('../lib/buttons');
 
 const ORDER = ['Download', 'Games', 'Tools', 'Media', 'Group', 'Profile', 'Settings', 'General'];
@@ -120,14 +119,17 @@ function royalCard(groups, config, opts = {}) {
   const mode = config.mode === 'private' ? 'PRIVATE 🔒' : 'PUBLIC 🌍';
   const ownerNo = String((config.owners || [])[0] || '').replace(/\D/g,'');
   const contact = /^[1-9]\d{7,14}$/.test(ownerNo) ? 'https://wa.me/'+ownerNo : '';
+  const tutorial = /^https:\/\//.test(String(config.youtubeUrl || '')) ? clean(config.youtubeUrl) : '';
   const requester = getRequester(opts.msg,opts.from);
   const {date,time} = currentIndiaTime();
   const memory = memoryInfo();
   const lines = [
     '╭━━〔 👑 *'+name+'* 👑 〕━━╮',
     '│ 👨‍💻 *Developer:* '+developer,
+    ...(config.menuShowSupport !== false && contact ? ['│ 🔧 *Dev No:* '+contact] : []),
+    ...(tutorial ? ['│ ▶️ *YouTube:* '+tutorial] : []),
     '│ 👑 *Owner:* '+developer,
-    ...(config.menuShowSupport !== false && contact ? ['│ 🔧 *Contact:* '+contact] : []),
+    ...(config.menuShowSupport !== false && contact ? ['│ 📞 *Contact:* '+contact] : []),
     '│ 👤 *User:* '+requester.name,
     ...(requester.phone ? ['│ 📱 *Number:* +'+requester.phone] : []),
     '│ 🏷️ *Version:* v'+version,
